@@ -1,0 +1,711 @@
+import React, { useState } from 'react';
+import { Plus, Search, Filter, TrendingUp, TrendingDown, Package, Truck, AlertTriangle, BarChart3, FileText, Calendar, ArrowRight, Eye, Download, RefreshCw } from 'lucide-react';
+import { colors } from '../../shared/colors.js';
+import { Card, Badge, Button } from '../../shared/SharedComponents.jsx';
+import WebHeader from './WebHeader.jsx';
+
+const Inventario = () => {
+  const [tabActivo, setTabActivo] = useState('movimientos'); // movimientos, ajustes, transferencias
+  const [filterTipo, setFilterTipo] = useState('todos');
+  const [filterPeriodo, setFilterPeriodo] = useState('hoy');
+  const [showModalMovimiento, setShowModalMovimiento] = useState(false);
+  const [showModalAjuste, setShowModalAjuste] = useState(false);
+  const [showModalTransferencia, setShowModalTransferencia] = useState(false);
+
+  // Datos de movimientos
+  const [movimientos] = useState([
+    {
+      id: 'MOV-001',
+      fecha: '2024-01-09 10:30',
+      tipo: 'Entrada',
+      concepto: 'Compra a proveedor',
+      producto: 'Refresco Cola 600ml',
+      cantidad: 200,
+      almacen: 'Almacén Principal',
+      usuario: 'Admin',
+      referencia: 'OC-045'
+    },
+    {
+      id: 'MOV-002',
+      fecha: '2024-01-09 09:15',
+      tipo: 'Salida',
+      concepto: 'Carga de ruta',
+      producto: 'Agua Natural 1L',
+      cantidad: -150,
+      almacen: 'Almacén Principal',
+      usuario: 'Carlos M.',
+      referencia: 'RUTA-012'
+    },
+    {
+      id: 'MOV-003',
+      fecha: '2024-01-09 08:45',
+      tipo: 'Entrada',
+      concepto: 'Devolución de ruta',
+      producto: 'Galletas Choco 300g',
+      cantidad: 15,
+      almacen: 'Almacén Principal',
+      usuario: 'Juan P.',
+      referencia: 'DEV-023'
+    },
+    {
+      id: 'MOV-004',
+      fecha: '2024-01-08 16:20',
+      tipo: 'Ajuste',
+      concepto: 'Ajuste por inventario',
+      producto: 'Pan Dulce Tradicional',
+      cantidad: -5,
+      almacen: 'Almacén Principal',
+      usuario: 'Admin',
+      referencia: 'AJ-012'
+    },
+    {
+      id: 'MOV-005',
+      fecha: '2024-01-08 14:30',
+      tipo: 'Transferencia',
+      concepto: 'Transferencia entre almacenes',
+      producto: 'Jabón Líquido 500ml',
+      cantidad: 50,
+      almacen: 'Almacén Norte → Almacén Sur',
+      usuario: 'Admin',
+      referencia: 'TRANS-008'
+    }
+  ]);
+
+  // Datos de ajustes
+  const [ajustes] = useState([
+    {
+      id: 'AJ-012',
+      fecha: '2024-01-08',
+      motivo: 'Inventario físico',
+      producto: 'Pan Dulce Tradicional',
+      stockSistema: 185,
+      stockFisico: 180,
+      diferencia: -5,
+      almacen: 'Almacén Principal',
+      usuario: 'Admin',
+      observaciones: 'Encontrado vencido'
+    },
+    {
+      id: 'AJ-011',
+      fecha: '2024-01-07',
+      motivo: 'Merma',
+      producto: 'Refresco Cola 600ml',
+      stockSistema: 250,
+      stockFisico: 248,
+      diferencia: -2,
+      almacen: 'Almacén Principal',
+      usuario: 'Admin',
+      observaciones: 'Envases rotos'
+    },
+    {
+      id: 'AJ-010',
+      fecha: '2024-01-06',
+      motivo: 'Inventario físico',
+      producto: 'Agua Natural 1L',
+      stockSistema: 850,
+      stockFisico: 855,
+      diferencia: 5,
+      almacen: 'Almacén Principal',
+      usuario: 'Admin',
+      observaciones: 'Encontrados en área de devoluciones'
+    }
+  ]);
+
+  // Datos de transferencias
+  const [transferencias] = useState([
+    {
+      id: 'TRANS-008',
+      fecha: '2024-01-08',
+      producto: 'Jabón Líquido 500ml',
+      cantidad: 50,
+      origen: 'Almacén Principal',
+      destino: 'Almacén Norte',
+      status: 'Completada',
+      solicitante: 'Juan P.',
+      autorizadoPor: 'Admin',
+      observaciones: 'Reabastecimiento zona norte'
+    },
+    {
+      id: 'TRANS-007',
+      fecha: '2024-01-07',
+      producto: 'Galletas Choco 300g',
+      cantidad: 100,
+      origen: 'Almacén Principal',
+      destino: 'Almacén Sur',
+      status: 'En tránsito',
+      solicitante: 'Carlos M.',
+      autorizadoPor: 'Admin',
+      observaciones: 'Promoción zona sur'
+    },
+    {
+      id: 'TRANS-006',
+      fecha: '2024-01-05',
+      producto: 'Refresco Cola 600ml',
+      cantidad: 200,
+      origen: 'Almacén Norte',
+      destino: 'Almacén Principal',
+      status: 'Completada',
+      solicitante: 'Admin',
+      autorizadoPor: 'Admin',
+      observaciones: 'Redistribución de inventario'
+    }
+  ]);
+
+  // Estadísticas
+  const stats = {
+    entradasHoy: movimientos.filter(m => m.tipo === 'Entrada' && m.fecha.includes('2024-01-09')).reduce((sum, m) => sum + m.cantidad, 0),
+    salidasHoy: Math.abs(movimientos.filter(m => m.tipo === 'Salida' && m.fecha.includes('2024-01-09')).reduce((sum, m) => sum + m.cantidad, 0)),
+    ajustesHoy: movimientos.filter(m => m.tipo === 'Ajuste' && m.fecha.includes('2024-01-09')).length,
+    transferenciasActivas: transferencias.filter(t => t.status === 'En tránsito').length
+  };
+
+  const movimientosFiltrados = movimientos.filter(m => {
+    const matchTipo = filterTipo === 'todos' || m.tipo === filterTipo;
+    const matchPeriodo = filterPeriodo === 'todos' || 
+                         (filterPeriodo === 'hoy' && m.fecha.includes('2024-01-09')) ||
+                         (filterPeriodo === 'ayer' && m.fecha.includes('2024-01-08'));
+    return matchTipo && matchPeriodo;
+  });
+
+  return (
+    <div style={{ 
+      marginLeft: 240, 
+      minHeight: '100vh',
+      backgroundColor: colors.gray50
+    }}>
+      <WebHeader 
+        title="Control de Inventario"
+        subtitle="Gestiona movimientos, ajustes y transferencias"
+      />
+
+      <div style={{ padding: 24 }}>
+        {/* Estadísticas */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(4, 1fr)', 
+          gap: 16, 
+          marginBottom: 24 
+        }}>
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, color: colors.gray500, marginBottom: 4 }}>
+                  Entradas Hoy
+                </div>
+                <div style={{ fontSize: 32, fontWeight: 700, color: colors.success }}>
+                  +{stats.entradasHoy}
+                </div>
+              </div>
+              <div style={{ 
+                width: 48, 
+                height: 48, 
+                borderRadius: 12, 
+                backgroundColor: colors.success + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <TrendingUp size={24} color={colors.success} />
+              </div>
+            </div>
+          </Card>
+
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, color: colors.gray500, marginBottom: 4 }}>
+                  Salidas Hoy
+                </div>
+                <div style={{ fontSize: 32, fontWeight: 700, color: colors.danger }}>
+                  -{stats.salidasHoy}
+                </div>
+              </div>
+              <div style={{ 
+                width: 48, 
+                height: 48, 
+                borderRadius: 12, 
+                backgroundColor: colors.danger + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <TrendingDown size={24} color={colors.danger} />
+              </div>
+            </div>
+          </Card>
+
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, color: colors.gray500, marginBottom: 4 }}>
+                  Ajustes Hoy
+                </div>
+                <div style={{ fontSize: 32, fontWeight: 700, color: colors.warning }}>
+                  {stats.ajustesHoy}
+                </div>
+              </div>
+              <div style={{ 
+                width: 48, 
+                height: 48, 
+                borderRadius: 12, 
+                backgroundColor: colors.warning + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <AlertTriangle size={24} color={colors.warning} />
+              </div>
+            </div>
+          </Card>
+
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, color: colors.gray500, marginBottom: 4 }}>
+                  Transferencias Activas
+                </div>
+                <div style={{ fontSize: 32, fontWeight: 700, color: colors.primary }}>
+                  {stats.transferenciasActivas}
+                </div>
+              </div>
+              <div style={{ 
+                width: 48, 
+                height: 48, 
+                borderRadius: 12, 
+                backgroundColor: colors.primary + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Truck size={24} color={colors.primary} />
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Tabs */}
+        <Card style={{ marginBottom: 24 }}>
+          <div style={{ display: 'flex', borderBottom: `1px solid ${colors.gray200}` }}>
+            <button
+              onClick={() => setTabActivo('movimientos')}
+              style={{
+                flex: 1,
+                padding: '16px 24px',
+                border: 'none',
+                backgroundColor: tabActivo === 'movimientos' ? 'white' : colors.gray50,
+                color: tabActivo === 'movimientos' ? colors.primary : colors.gray600,
+                fontWeight: tabActivo === 'movimientos' ? 600 : 400,
+                fontSize: 14,
+                cursor: 'pointer',
+                borderBottom: tabActivo === 'movimientos' ? `3px solid ${colors.primary}` : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8
+              }}
+            >
+              <BarChart3 size={18} />
+              Movimientos
+              <Badge color="primary" style={{ fontSize: 11 }}>{movimientos.length}</Badge>
+            </button>
+            <button
+              onClick={() => setTabActivo('ajustes')}
+              style={{
+                flex: 1,
+                padding: '16px 24px',
+                border: 'none',
+                backgroundColor: tabActivo === 'ajustes' ? 'white' : colors.gray50,
+                color: tabActivo === 'ajustes' ? colors.primary : colors.gray600,
+                fontWeight: tabActivo === 'ajustes' ? 600 : 400,
+                fontSize: 14,
+                cursor: 'pointer',
+                borderBottom: tabActivo === 'ajustes' ? `3px solid ${colors.primary}` : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8
+              }}
+            >
+              <RefreshCw size={18} />
+              Ajustes
+              <Badge color="warning" style={{ fontSize: 11 }}>{ajustes.length}</Badge>
+            </button>
+            <button
+              onClick={() => setTabActivo('transferencias')}
+              style={{
+                flex: 1,
+                padding: '16px 24px',
+                border: 'none',
+                backgroundColor: tabActivo === 'transferencias' ? 'white' : colors.gray50,
+                color: tabActivo === 'transferencias' ? colors.primary : colors.gray600,
+                fontWeight: tabActivo === 'transferencias' ? 600 : 400,
+                fontSize: 14,
+                cursor: 'pointer',
+                borderBottom: tabActivo === 'transferencias' ? `3px solid ${colors.primary}` : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8
+              }}
+            >
+              <Truck size={18} />
+              Transferencias
+              <Badge color="accent" style={{ fontSize: 11 }}>{transferencias.length}</Badge>
+            </button>
+          </div>
+        </Card>
+
+        {/* Contenido según tab activo */}
+        {tabActivo === 'movimientos' && (
+          <TabMovimientos 
+            movimientos={movimientosFiltrados}
+            filterTipo={filterTipo}
+            setFilterTipo={setFilterTipo}
+            filterPeriodo={filterPeriodo}
+            setFilterPeriodo={setFilterPeriodo}
+            onNuevoMovimiento={() => setShowModalMovimiento(true)}
+          />
+        )}
+
+        {tabActivo === 'ajustes' && (
+          <TabAjustes 
+            ajustes={ajustes}
+            onNuevoAjuste={() => setShowModalAjuste(true)}
+          />
+        )}
+
+        {tabActivo === 'transferencias' && (
+          <TabTransferencias 
+            transferencias={transferencias}
+            onNuevaTransferencia={() => setShowModalTransferencia(true)}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Tab Movimientos
+const TabMovimientos = ({ movimientos, filterTipo, setFilterTipo, filterPeriodo, setFilterPeriodo, onNuevoMovimiento }) => {
+  return (
+    <div>
+      {/* Filtros y acciones */}
+      <Card style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <select
+            value={filterTipo}
+            onChange={(e) => setFilterTipo(e.target.value)}
+            style={{
+              padding: '10px 12px',
+              border: `1px solid ${colors.gray300}`,
+              borderRadius: 8,
+              fontSize: 14,
+              minWidth: 150
+            }}
+          >
+            <option value="todos">Todos los tipos</option>
+            <option value="Entrada">Entradas</option>
+            <option value="Salida">Salidas</option>
+            <option value="Ajuste">Ajustes</option>
+            <option value="Transferencia">Transferencias</option>
+          </select>
+
+          <select
+            value={filterPeriodo}
+            onChange={(e) => setFilterPeriodo(e.target.value)}
+            style={{
+              padding: '10px 12px',
+              border: `1px solid ${colors.gray300}`,
+              borderRadius: 8,
+              fontSize: 14,
+              minWidth: 150
+            }}
+          >
+            <option value="hoy">Hoy</option>
+            <option value="ayer">Ayer</option>
+            <option value="semana">Esta semana</option>
+            <option value="mes">Este mes</option>
+            <option value="todos">Todos</option>
+          </select>
+
+          <div style={{ flex: 1 }} />
+
+          <Button variant="outline" size="sm" icon={<Download size={16} />}>
+            Exportar
+          </Button>
+        </div>
+      </Card>
+
+      {/* Tabla de movimientos */}
+      <Card>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: `2px solid ${colors.gray200}`, backgroundColor: colors.gray50 }}>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>ID</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Fecha/Hora</th>
+              <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Tipo</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Producto</th>
+              <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Cantidad</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Concepto</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Almacén</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Usuario</th>
+              <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {movimientos.map(mov => (
+              <tr key={mov.id} style={{ borderBottom: `1px solid ${colors.gray100}` }}>
+                <td style={{ padding: 12, fontFamily: 'monospace', fontWeight: 600, fontSize: 12 }}>
+                  {mov.id}
+                </td>
+                <td style={{ padding: 12, fontSize: 13 }}>{mov.fecha}</td>
+                <td style={{ padding: 12, textAlign: 'center' }}>
+                  <Badge color={
+                    mov.tipo === 'Entrada' ? 'success' :
+                    mov.tipo === 'Salida' ? 'danger' :
+                    mov.tipo === 'Ajuste' ? 'warning' : 'accent'
+                  }>
+                    {mov.tipo}
+                  </Badge>
+                </td>
+                <td style={{ padding: 12, fontSize: 13, fontWeight: 500 }}>{mov.producto}</td>
+                <td style={{ 
+                  padding: 12, 
+                  textAlign: 'center', 
+                  fontSize: 15,
+                  fontWeight: 700,
+                  color: mov.cantidad > 0 ? colors.success : colors.danger
+                }}>
+                  {mov.cantidad > 0 ? '+' : ''}{mov.cantidad}
+                </td>
+                <td style={{ padding: 12, fontSize: 13 }}>{mov.concepto}</td>
+                <td style={{ padding: 12, fontSize: 12, color: colors.gray600 }}>{mov.almacen}</td>
+                <td style={{ padding: 12, fontSize: 13 }}>{mov.usuario}</td>
+                <td style={{ padding: 12, textAlign: 'center' }}>
+                  <button
+                    style={{
+                      padding: '6px 8px',
+                      borderRadius: 6,
+                      border: `1px solid ${colors.primary}`,
+                      backgroundColor: 'white',
+                      color: colors.primary,
+                      cursor: 'pointer',
+                      fontSize: 11
+                    }}
+                  >
+                    <Eye size={14} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {movimientos.length === 0 && (
+          <div style={{ textAlign: 'center', padding: 40, color: colors.gray400 }}>
+            <Package size={48} style={{ marginBottom: 12 }} />
+            <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
+              No hay movimientos registrados
+            </div>
+            <div style={{ fontSize: 14 }}>
+              Los movimientos de inventario aparecerán aquí
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+};
+
+// Tab Ajustes
+const TabAjustes = ({ ajustes, onNuevoAjuste }) => {
+  return (
+    <div>
+      {/* Acciones */}
+      <Card style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'flex-end' }}>
+          <Button variant="primary" icon={<Plus size={16} />} onClick={onNuevoAjuste}>
+            Nuevo Ajuste
+          </Button>
+          <Button variant="outline" size="sm" icon={<Download size={16} />}>
+            Exportar
+          </Button>
+        </div>
+      </Card>
+
+      {/* Tabla de ajustes */}
+      <Card>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: `2px solid ${colors.gray200}`, backgroundColor: colors.gray50 }}>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>ID</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Fecha</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Producto</th>
+              <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Stock Sistema</th>
+              <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Stock Físico</th>
+              <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Diferencia</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Motivo</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Observaciones</th>
+              <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ajustes.map(ajuste => (
+              <tr key={ajuste.id} style={{ borderBottom: `1px solid ${colors.gray100}` }}>
+                <td style={{ padding: 12, fontFamily: 'monospace', fontWeight: 600, fontSize: 12 }}>
+                  {ajuste.id}
+                </td>
+                <td style={{ padding: 12, fontSize: 13 }}>{ajuste.fecha}</td>
+                <td style={{ padding: 12, fontSize: 13, fontWeight: 500 }}>{ajuste.producto}</td>
+                <td style={{ padding: 12, textAlign: 'center', fontSize: 14 }}>{ajuste.stockSistema}</td>
+                <td style={{ padding: 12, textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                  {ajuste.stockFisico}
+                </td>
+                <td style={{ 
+                  padding: 12, 
+                  textAlign: 'center', 
+                  fontSize: 15,
+                  fontWeight: 700,
+                  color: ajuste.diferencia > 0 ? colors.success : ajuste.diferencia < 0 ? colors.danger : colors.gray500
+                }}>
+                  {ajuste.diferencia > 0 ? '+' : ''}{ajuste.diferencia}
+                </td>
+                <td style={{ padding: 12, fontSize: 13 }}>
+                  <Badge color={ajuste.motivo === 'Merma' ? 'danger' : 'warning'}>
+                    {ajuste.motivo}
+                  </Badge>
+                </td>
+                <td style={{ padding: 12, fontSize: 12, color: colors.gray600 }}>
+                  {ajuste.observaciones}
+                </td>
+                <td style={{ padding: 12, textAlign: 'center' }}>
+                  <button
+                    style={{
+                      padding: '6px 8px',
+                      borderRadius: 6,
+                      border: `1px solid ${colors.primary}`,
+                      backgroundColor: 'white',
+                      color: colors.primary,
+                      cursor: 'pointer',
+                      fontSize: 11
+                    }}
+                  >
+                    <Eye size={14} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {ajustes.length === 0 && (
+          <div style={{ textAlign: 'center', padding: 40, color: colors.gray400 }}>
+            <RefreshCw size={48} style={{ marginBottom: 12 }} />
+            <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
+              No hay ajustes registrados
+            </div>
+            <div style={{ fontSize: 14 }}>
+              Los ajustes de inventario aparecerán aquí
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+};
+
+// Tab Transferencias
+const TabTransferencias = ({ transferencias, onNuevaTransferencia }) => {
+  return (
+    <div>
+      {/* Acciones */}
+      <Card style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'flex-end' }}>
+          <Button variant="primary" icon={<Plus size={16} />} onClick={onNuevaTransferencia}>
+            Nueva Transferencia
+          </Button>
+          <Button variant="outline" size="sm" icon={<Download size={16} />}>
+            Exportar
+          </Button>
+        </div>
+      </Card>
+
+      {/* Tabla de transferencias */}
+      <Card>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ borderBottom: `2px solid ${colors.gray200}`, backgroundColor: colors.gray50 }}>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>ID</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Fecha</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Producto</th>
+              <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Cantidad</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Ruta</th>
+              <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Estado</th>
+              <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Solicitante</th>
+              <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {transferencias.map(trans => (
+              <tr key={trans.id} style={{ borderBottom: `1px solid ${colors.gray100}` }}>
+                <td style={{ padding: 12, fontFamily: 'monospace', fontWeight: 600, fontSize: 12 }}>
+                  {trans.id}
+                </td>
+                <td style={{ padding: 12, fontSize: 13 }}>{trans.fecha}</td>
+                <td style={{ padding: 12, fontSize: 13, fontWeight: 500 }}>{trans.producto}</td>
+                <td style={{ padding: 12, textAlign: 'center', fontSize: 15, fontWeight: 700, color: colors.primary }}>
+                  {trans.cantidad}
+                </td>
+                <td style={{ padding: 12, fontSize: 13 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 12, color: colors.gray600 }}>{trans.origen}</span>
+                    <ArrowRight size={16} color={colors.primary} />
+                    <span style={{ fontSize: 12, fontWeight: 600 }}>{trans.destino}</span>
+                  </div>
+                </td>
+                <td style={{ padding: 12, textAlign: 'center' }}>
+                  <Badge color={
+                    trans.status === 'Completada' ? 'success' :
+                    trans.status === 'En tránsito' ? 'warning' : 'danger'
+                  }>
+                    {trans.status}
+                  </Badge>
+                </td>
+                <td style={{ padding: 12, fontSize: 13 }}>{trans.solicitante}</td>
+                <td style={{ padding: 12, textAlign: 'center' }}>
+                  <button
+                    style={{
+                      padding: '6px 8px',
+                      borderRadius: 6,
+                      border: `1px solid ${colors.primary}`,
+                      backgroundColor: 'white',
+                      color: colors.primary,
+                      cursor: 'pointer',
+                      fontSize: 11
+                    }}
+                  >
+                    <Eye size={14} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {transferencias.length === 0 && (
+          <div style={{ textAlign: 'center', padding: 40, color: colors.gray400 }}>
+            <Truck size={48} style={{ marginBottom: 12 }} />
+            <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
+              No hay transferencias registradas
+            </div>
+            <div style={{ fontSize: 14 }}>
+              Las transferencias entre almacenes aparecerán aquí
+            </div>
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+};
+
+export default Inventario;

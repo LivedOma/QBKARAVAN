@@ -1,0 +1,1153 @@
+import React, { useState } from 'react';
+import { Users, UserPlus, Shield, Activity, Mail, Phone, MapPin, Calendar, Edit2, Trash2, Lock, Eye, EyeOff, CheckCircle, XCircle, Clock, Search, Filter } from 'lucide-react';
+import { colors } from '../../shared/colors.js';
+import { Card, Badge, Button } from '../../shared/SharedComponents.jsx';
+import WebHeader from './WebHeader.jsx';
+
+const Usuarios = () => {
+  const [busqueda, setBusqueda] = useState('');
+  const [filtroRol, setFiltroRol] = useState('todos');
+  const [filtroEstado, setFiltroEstado] = useState('todos');
+  const [modalUsuario, setModalUsuario] = useState(false);
+  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
+  const [panelDetalles, setPanelDetalles] = useState(false);
+  const [tabActiva, setTabActiva] = useState('general');
+
+  const usuarios = [
+    {
+      id: 'USR-001',
+      nombre: 'Carlos Ramírez',
+      email: 'carlos.ramirez@empresa.com',
+      telefono: '555-0101',
+      rol: 'Administrador',
+      estado: 'Activo',
+      zona: 'Todas',
+      fechaRegistro: '2023-01-15',
+      ultimoAcceso: '2024-01-10 08:30',
+      permisos: ['Todos los módulos', 'Configuración', 'Usuarios', 'Reportes'],
+      avatar: 'CR',
+      color: colors.primary
+    },
+    {
+      id: 'USR-002',
+      nombre: 'María González',
+      email: 'maria.gonzalez@empresa.com',
+      telefono: '555-0102',
+      rol: 'Supervisor',
+      estado: 'Activo',
+      zona: 'Norte',
+      fechaRegistro: '2023-03-20',
+      ultimoAcceso: '2024-01-10 09:15',
+      permisos: ['Planificación', 'Monitoreo', 'Clientes', 'Productos', 'Reportes'],
+      avatar: 'MG',
+      color: colors.success
+    },
+    {
+      id: 'USR-003',
+      nombre: 'Juan Pérez',
+      email: 'juan.perez@empresa.com',
+      telefono: '555-0103',
+      rol: 'Preventista',
+      estado: 'Activo',
+      zona: 'Norte',
+      fechaRegistro: '2023-06-10',
+      ultimoAcceso: '2024-01-09 18:45',
+      permisos: ['Clientes', 'Pedidos', 'Inventario'],
+      avatar: 'JP',
+      color: colors.warning
+    },
+    {
+      id: 'USR-004',
+      nombre: 'Ana Martínez',
+      email: 'ana.martinez@empresa.com',
+      telefono: '555-0104',
+      rol: 'Repartidor',
+      estado: 'Activo',
+      zona: 'Sur',
+      fechaRegistro: '2023-08-05',
+      ultimoAcceso: '2024-01-10 07:20',
+      permisos: ['Entregas', 'Rutas', 'Evidencias'],
+      avatar: 'AM',
+      color: colors.accent
+    },
+    {
+      id: 'USR-005',
+      nombre: 'Roberto Silva',
+      email: 'roberto.silva@empresa.com',
+      telefono: '555-0105',
+      rol: 'Preventista',
+      estado: 'Inactivo',
+      zona: 'Centro',
+      fechaRegistro: '2023-04-12',
+      ultimoAcceso: '2023-12-15 16:30',
+      permisos: ['Clientes', 'Pedidos', 'Inventario'],
+      avatar: 'RS',
+      color: colors.gray400
+    },
+    {
+      id: 'USR-006',
+      nombre: 'Laura Torres',
+      email: 'laura.torres@empresa.com',
+      telefono: '555-0106',
+      rol: 'Supervisor',
+      estado: 'Activo',
+      zona: 'Sur',
+      fechaRegistro: '2023-09-18',
+      ultimoAcceso: '2024-01-10 10:05',
+      permisos: ['Planificación', 'Monitoreo', 'Clientes', 'Productos', 'Reportes'],
+      avatar: 'LT',
+      color: colors.success
+    }
+  ];
+
+  const actividadReciente = [
+    { id: 1, usuario: 'Carlos Ramírez', accion: 'Creó nuevo cliente', modulo: 'Clientes', fecha: '2024-01-10 08:45', tipo: 'create' },
+    { id: 2, usuario: 'María González', accion: 'Aprobó ruta Norte-01', modulo: 'Planificación', fecha: '2024-01-10 08:30', tipo: 'approve' },
+    { id: 3, usuario: 'Juan Pérez', accion: 'Editó pedido PED-1247', modulo: 'Pedidos', fecha: '2024-01-10 08:15', tipo: 'edit' },
+    { id: 4, usuario: 'Ana Martínez', accion: 'Completó entrega ENT-0856', modulo: 'Entregas', fecha: '2024-01-10 07:50', tipo: 'complete' },
+    { id: 5, usuario: 'Laura Torres', accion: 'Generó reporte de ventas', modulo: 'Reportes', fecha: '2024-01-10 07:30', tipo: 'report' }
+  ];
+
+  const estadisticas = {
+    totalUsuarios: usuarios.length,
+    usuariosActivos: usuarios.filter(u => u.estado === 'Activo').length,
+    usuariosInactivos: usuarios.filter(u => u.estado === 'Inactivo').length,
+    administradores: usuarios.filter(u => u.rol === 'Administrador').length,
+    supervisores: usuarios.filter(u => u.rol === 'Supervisor').length,
+    preventistas: usuarios.filter(u => u.rol === 'Preventista').length,
+    repartidores: usuarios.filter(u => u.rol === 'Repartidor').length
+  };
+
+  const usuariosFiltrados = usuarios.filter(usuario => {
+    const matchBusqueda = usuario.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+                         usuario.email.toLowerCase().includes(busqueda.toLowerCase()) ||
+                         usuario.id.toLowerCase().includes(busqueda.toLowerCase());
+    const matchRol = filtroRol === 'todos' || usuario.rol === filtroRol;
+    const matchEstado = filtroEstado === 'todos' || usuario.estado === filtroEstado;
+    return matchBusqueda && matchRol && matchEstado;
+  });
+
+  const abrirModalNuevo = () => {
+    setUsuarioSeleccionado(null);
+    setModalUsuario(true);
+  };
+
+  const abrirModalEditar = (usuario) => {
+    setUsuarioSeleccionado(usuario);
+    setModalUsuario(true);
+  };
+
+  const abrirDetalles = (usuario) => {
+    setUsuarioSeleccionado(usuario);
+    setPanelDetalles(true);
+    setTabActiva('general');
+  };
+
+  return (
+    <div style={{ 
+      minHeight: '100vh',
+      backgroundColor: colors.gray50
+    }}>
+      <WebHeader 
+        title="Gestión de Usuarios"
+        subtitle="Administra usuarios, roles y permisos del sistema"
+      />
+
+      <div style={{ padding: 24 }}>
+        {/* Estadísticas */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(4, 1fr)', 
+          gap: 16, 
+          marginBottom: 24 
+        }}>
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                backgroundColor: colors.primary + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Users size={24} color={colors.primary} />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 4 }}>
+                  Total Usuarios
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: colors.gray800 }}>
+                  {estadisticas.totalUsuarios}
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                backgroundColor: colors.success + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <CheckCircle size={24} color={colors.success} />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 4 }}>
+                  Usuarios Activos
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: colors.gray800 }}>
+                  {estadisticas.usuariosActivos}
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                backgroundColor: colors.warning + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Shield size={24} color={colors.warning} />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 4 }}>
+                  Administradores
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: colors.gray800 }}>
+                  {estadisticas.administradores}
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                backgroundColor: colors.accent + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Activity size={24} color={colors.accent} />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 4 }}>
+                  Sesiones Activas
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: colors.gray800 }}>
+                  {estadisticas.usuariosActivos}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: panelDetalles ? '1fr 600px' : '1fr', gap: 24 }}>
+          {/* Lista de Usuarios */}
+          <div>
+            <Card style={{ marginBottom: 24 }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div style={{ flex: 1, position: 'relative' }}>
+                  <Search 
+                    size={18} 
+                    style={{ 
+                      position: 'absolute', 
+                      left: 12, 
+                      top: '50%', 
+                      transform: 'translateY(-50%)',
+                      color: colors.gray400 
+                    }} 
+                  />
+                  <input
+                    type="text"
+                    placeholder="Buscar por nombre, email o ID..."
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px 10px 40px',
+                      border: `1px solid ${colors.gray300}`,
+                      borderRadius: 8,
+                      fontSize: 14
+                    }}
+                  />
+                </div>
+
+                <select
+                  value={filtroRol}
+                  onChange={(e) => setFiltroRol(e.target.value)}
+                  style={{
+                    padding: '10px 12px',
+                    border: `1px solid ${colors.gray300}`,
+                    borderRadius: 8,
+                    fontSize: 14,
+                    backgroundColor: 'white',
+                    minWidth: 150
+                  }}
+                >
+                  <option value="todos">Todos los roles</option>
+                  <option value="Administrador">Administrador</option>
+                  <option value="Supervisor">Supervisor</option>
+                  <option value="Preventista">Preventista</option>
+                  <option value="Repartidor">Repartidor</option>
+                </select>
+
+                <select
+                  value={filtroEstado}
+                  onChange={(e) => setFiltroEstado(e.target.value)}
+                  style={{
+                    padding: '10px 12px',
+                    border: `1px solid ${colors.gray300}`,
+                    borderRadius: 8,
+                    fontSize: 14,
+                    backgroundColor: 'white',
+                    minWidth: 120
+                  }}
+                >
+                  <option value="todos">Todos</option>
+                  <option value="Activo">Activos</option>
+                  <option value="Inactivo">Inactivos</option>
+                </select>
+
+                <Button variant="primary" icon={<UserPlus size={18} />} onClick={abrirModalNuevo}>
+                  Nuevo Usuario
+                </Button>
+              </div>
+            </Card>
+
+            <Card>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: `2px solid ${colors.gray200}`, backgroundColor: colors.gray50 }}>
+                    <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Usuario
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Contacto
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Rol
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Zona
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Último Acceso
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Estado
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usuariosFiltrados.map(usuario => (
+                    <tr 
+                      key={usuario.id} 
+                      style={{ 
+                        borderBottom: `1px solid ${colors.gray100}`,
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => abrirDetalles(usuario)}
+                    >
+                      <td style={{ padding: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <div style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '50%',
+                            backgroundColor: usuario.color + '20',
+                            color: usuario.color,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 14,
+                            fontWeight: 600
+                          }}>
+                            {usuario.avatar}
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: colors.gray800 }}>
+                              {usuario.nombre}
+                            </div>
+                            <div style={{ fontSize: 12, color: colors.gray500 }}>
+                              {usuario.id}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ padding: 12 }}>
+                        <div style={{ fontSize: 13, color: colors.gray700, marginBottom: 2 }}>
+                          {usuario.email}
+                        </div>
+                        <div style={{ fontSize: 12, color: colors.gray500 }}>
+                          {usuario.telefono}
+                        </div>
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'center' }}>
+                        <Badge color={
+                          usuario.rol === 'Administrador' ? 'danger' :
+                          usuario.rol === 'Supervisor' ? 'primary' :
+                          usuario.rol === 'Preventista' ? 'warning' : 'accent'
+                        }>
+                          {usuario.rol}
+                        </Badge>
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'center', fontSize: 14 }}>
+                        {usuario.zona}
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'center', fontSize: 13, color: colors.gray600 }}>
+                        {usuario.ultimoAcceso}
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'center' }}>
+                        <Badge color={usuario.estado === 'Activo' ? 'success' : 'gray'}>
+                          {usuario.estado}
+                        </Badge>
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'center' }}>
+                        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              abrirModalEditar(usuario);
+                            }}
+                            style={{
+                              padding: 6,
+                              border: 'none',
+                              backgroundColor: colors.primary + '20',
+                              color: colors.primary,
+                              borderRadius: 6,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (confirm(`¿Eliminar usuario ${usuario.nombre}?`)) {
+                                console.log('Eliminar:', usuario.id);
+                              }
+                            }}
+                            style={{
+                              padding: 6,
+                              border: 'none',
+                              backgroundColor: colors.danger + '20',
+                              color: colors.danger,
+                              borderRadius: 6,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {usuariosFiltrados.length === 0 && (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: 40,
+                  color: colors.gray400 
+                }}>
+                  <Users size={48} style={{ marginBottom: 12 }} />
+                  <div style={{ fontSize: 16, fontWeight: 500 }}>
+                    No se encontraron usuarios
+                  </div>
+                </div>
+              )}
+            </Card>
+
+            {/* Actividad Reciente */}
+            <Card style={{ marginTop: 24 }}>
+              <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Activity size={20} />
+                Actividad Reciente
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {actividadReciente.map(act => (
+                  <div 
+                    key={act.id}
+                    style={{
+                      padding: 12,
+                      backgroundColor: colors.gray50,
+                      borderRadius: 8,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: colors.gray800, marginBottom: 4 }}>
+                        {act.usuario} • {act.accion}
+                      </div>
+                      <div style={{ fontSize: 12, color: colors.gray500 }}>
+                        <Badge color="gray" style={{ marginRight: 8 }}>
+                          {act.modulo}
+                        </Badge>
+                        {act.fecha}
+                      </div>
+                    </div>
+                    <Badge color={
+                      act.tipo === 'create' ? 'success' :
+                      act.tipo === 'edit' ? 'warning' :
+                      act.tipo === 'approve' ? 'primary' :
+                      act.tipo === 'complete' ? 'accent' : 'gray'
+                    }>
+                      {act.tipo === 'create' ? 'Crear' :
+                       act.tipo === 'edit' ? 'Editar' :
+                       act.tipo === 'approve' ? 'Aprobar' :
+                       act.tipo === 'complete' ? 'Completar' : 'Reporte'}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          {/* Panel de Detalles */}
+          {panelDetalles && usuarioSeleccionado && (
+            <PanelDetallesUsuario
+              usuario={usuarioSeleccionado}
+              onClose={() => setPanelDetalles(false)}
+              tabActiva={tabActiva}
+              setTabActiva={setTabActiva}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Modal Usuario */}
+      {modalUsuario && (
+        <ModalUsuario
+          usuario={usuarioSeleccionado}
+          onClose={() => setModalUsuario(false)}
+          onSave={(datos) => {
+            console.log('Guardar usuario:', datos);
+            setModalUsuario(false);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+// Modal para Crear/Editar Usuario
+const ModalUsuario = ({ usuario, onClose, onSave }) => {
+  const [formData, setFormData] = useState({
+    nombre: usuario?.nombre || '',
+    email: usuario?.email || '',
+    telefono: usuario?.telefono || '',
+    rol: usuario?.rol || 'Preventista',
+    zona: usuario?.zona || 'Norte',
+    estado: usuario?.estado || 'Activo',
+    password: '',
+    confirmarPassword: ''
+  });
+
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: 20
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: 12,
+        width: '100%',
+        maxWidth: 600,
+        maxHeight: '90vh',
+        overflow: 'auto'
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: 24,
+          borderBottom: `1px solid ${colors.gray200}`,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <h2 style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>
+            {usuario ? 'Editar Usuario' : 'Nuevo Usuario'}
+          </h2>
+          <button onClick={onClose} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 24 }}>
+            ×
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: 24 }}>
+          {/* Información Personal */}
+          <div style={{ marginBottom: 24 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: colors.gray700 }}>
+              Información Personal
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                  Nombre Completo *
+                </label>
+                <input
+                  type="text"
+                  value={formData.nombre}
+                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: `1px solid ${colors.gray300}`,
+                    borderRadius: 8,
+                    fontSize: 14
+                  }}
+                  placeholder="Nombre completo del usuario"
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${colors.gray300}`,
+                      borderRadius: 8,
+                      fontSize: 14
+                    }}
+                    placeholder="email@empresa.com"
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                    Teléfono *
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.telefono}
+                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${colors.gray300}`,
+                      borderRadius: 8,
+                      fontSize: 14
+                    }}
+                    placeholder="555-0000"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Rol y Permisos */}
+          <div style={{ marginBottom: 24 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: colors.gray700 }}>
+              Rol y Permisos
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                  Rol *
+                </label>
+                <select
+                  value={formData.rol}
+                  onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: `1px solid ${colors.gray300}`,
+                    borderRadius: 8,
+                    fontSize: 14,
+                    backgroundColor: 'white'
+                  }}
+                >
+                  <option value="Administrador">Administrador</option>
+                  <option value="Supervisor">Supervisor</option>
+                  <option value="Preventista">Preventista</option>
+                  <option value="Repartidor">Repartidor</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                  Zona Asignada *
+                </label>
+                <select
+                  value={formData.zona}
+                  onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: `1px solid ${colors.gray300}`,
+                    borderRadius: 8,
+                    fontSize: 14,
+                    backgroundColor: 'white'
+                  }}
+                >
+                  <option value="Todas">Todas</option>
+                  <option value="Norte">Norte</option>
+                  <option value="Sur">Sur</option>
+                  <option value="Centro">Centro</option>
+                  <option value="Oriente">Oriente</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Seguridad */}
+          {!usuario && (
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: colors.gray700 }}>
+                Seguridad
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                    Contraseña *
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type={mostrarPassword ? 'text' : 'password'}
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 40px 10px 12px',
+                        border: `1px solid ${colors.gray300}`,
+                        borderRadius: 8,
+                        fontSize: 14
+                      }}
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setMostrarPassword(!mostrarPassword)}
+                      style={{
+                        position: 'absolute',
+                        right: 10,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        border: 'none',
+                        background: 'none',
+                        cursor: 'pointer',
+                        color: colors.gray400
+                      }}
+                    >
+                      {mostrarPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                    Confirmar Contraseña *
+                  </label>
+                  <input
+                    type={mostrarPassword ? 'text' : 'password'}
+                    value={formData.confirmarPassword}
+                    onChange={(e) => setFormData({ ...formData, confirmarPassword: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${colors.gray300}`,
+                      borderRadius: 8,
+                      fontSize: 14
+                    }}
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Estado */}
+          <div>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+              Estado
+            </label>
+            <select
+              value={formData.estado}
+              onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14,
+                backgroundColor: 'white'
+              }}
+            >
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          padding: 24,
+          borderTop: `1px solid ${colors.gray200}`,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 12
+        }}>
+          <Button variant="secondary" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={() => onSave(formData)}
+            icon={usuario ? <Edit2 size={18} /> : <UserPlus size={18} />}
+          >
+            {usuario ? 'Actualizar' : 'Crear Usuario'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Panel de Detalles del Usuario
+const PanelDetallesUsuario = ({ usuario, onClose, tabActiva, setTabActiva }) => {
+  const tabs = [
+    { id: 'general', label: 'General', icon: Users },
+    { id: 'permisos', label: 'Permisos', icon: Shield },
+    { id: 'actividad', label: 'Actividad', icon: Activity },
+    { id: 'sesiones', label: 'Sesiones', icon: Clock }
+  ];
+
+  return (
+    <div style={{
+      backgroundColor: 'white',
+      borderRadius: 12,
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      height: 'fit-content',
+      position: 'sticky',
+      top: 24
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: 20,
+        borderBottom: `1px solid ${colors.gray200}`,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start'
+      }}>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <div style={{
+            width: 64,
+            height: 64,
+            borderRadius: '50%',
+            backgroundColor: usuario.color + '20',
+            color: usuario.color,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 24,
+            fontWeight: 700
+          }}>
+            {usuario.avatar}
+          </div>
+          <div>
+            <h3 style={{ fontSize: 18, fontWeight: 600, margin: 0, marginBottom: 4 }}>
+              {usuario.nombre}
+            </h3>
+            <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 8 }}>
+              {usuario.id}
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Badge color={
+                usuario.rol === 'Administrador' ? 'danger' :
+                usuario.rol === 'Supervisor' ? 'primary' :
+                usuario.rol === 'Preventista' ? 'warning' : 'accent'
+              }>
+                {usuario.rol}
+              </Badge>
+              <Badge color={usuario.estado === 'Activo' ? 'success' : 'gray'}>
+                {usuario.estado}
+              </Badge>
+            </div>
+          </div>
+        </div>
+        <button 
+          onClick={onClose}
+          style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 24, color: colors.gray400 }}
+        >
+          ×
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <div style={{
+        display: 'flex',
+        borderBottom: `1px solid ${colors.gray200}`,
+        padding: '0 20px'
+      }}>
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setTabActiva(tab.id)}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              border: 'none',
+              backgroundColor: 'transparent',
+              borderBottom: `2px solid ${tabActiva === tab.id ? colors.primary : 'transparent'}`,
+              color: tabActiva === tab.id ? colors.primary : colors.gray500,
+              cursor: 'pointer',
+              fontSize: 14,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6
+            }}
+          >
+            <tab.icon size={16} />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Contenido */}
+      <div style={{ padding: 20, maxHeight: 600, overflowY: 'auto' }}>
+        {tabActiva === 'general' && <TabGeneral usuario={usuario} />}
+        {tabActiva === 'permisos' && <TabPermisos usuario={usuario} />}
+        {tabActiva === 'actividad' && <TabActividad usuario={usuario} />}
+        {tabActiva === 'sesiones' && <TabSesiones usuario={usuario} />}
+      </div>
+    </div>
+  );
+};
+
+// Tab General
+const TabGeneral = ({ usuario }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <Card style={{ padding: 16, backgroundColor: colors.gray50 }}>
+      <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: colors.gray700 }}>
+        Información de Contacto
+      </h4>
+      <InfoRow icon={<Mail size={16} />} label="Email" value={usuario.email} />
+      <InfoRow icon={<Phone size={16} />} label="Teléfono" value={usuario.telefono} />
+      <InfoRow icon={<MapPin size={16} />} label="Zona" value={usuario.zona} />
+    </Card>
+
+    <Card style={{ padding: 16, backgroundColor: colors.gray50 }}>
+      <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: colors.gray700 }}>
+        Información del Sistema
+      </h4>
+      <InfoRow icon={<Calendar size={16} />} label="Fecha de Registro" value={usuario.fechaRegistro} />
+      <InfoRow icon={<Clock size={16} />} label="Último Acceso" value={usuario.ultimoAcceso} />
+      <InfoRow icon={<Shield size={16} />} label="Rol" value={usuario.rol} />
+    </Card>
+
+    <Card style={{ padding: 16, backgroundColor: colors.primary + '10' }}>
+      <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: colors.primary }}>
+        Estadísticas
+      </h4>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 24, fontWeight: 700, color: colors.primary }}>45</div>
+          <div style={{ fontSize: 12, color: colors.gray600 }}>Acciones Hoy</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 24, fontWeight: 700, color: colors.primary }}>328</div>
+          <div style={{ fontSize: 12, color: colors.gray600 }}>Total Mes</div>
+        </div>
+      </div>
+    </Card>
+  </div>
+);
+
+// Tab Permisos
+const TabPermisos = ({ usuario }) => {
+  const todosPermisos = [
+    { modulo: 'Dashboard', acceso: true },
+    { modulo: 'Planificación', acceso: usuario.permisos.includes('Planificación') },
+    { modulo: 'Monitoreo', acceso: usuario.permisos.includes('Monitoreo') },
+    { modulo: 'Clientes', acceso: usuario.permisos.includes('Clientes') },
+    { modulo: 'Productos', acceso: usuario.permisos.includes('Productos') },
+    { modulo: 'Inventario', acceso: usuario.permisos.includes('Inventario') },
+    { modulo: 'Cobranza', acceso: usuario.permisos.includes('Cobranza') },
+    { modulo: 'Reportes', acceso: usuario.permisos.includes('Reportes') },
+    { modulo: 'Usuarios', acceso: usuario.permisos.includes('Usuarios') },
+    { modulo: 'Configuración', acceso: usuario.permisos.includes('Configuración') }
+  ];
+
+  return (
+    <div>
+      <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: colors.gray700 }}>
+        Módulos Disponibles
+      </h4>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {todosPermisos.map((permiso, idx) => (
+          <div
+            key={idx}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: 12,
+              backgroundColor: colors.gray50,
+              borderRadius: 8
+            }}
+          >
+            <span style={{ fontSize: 14, fontWeight: 500 }}>{permiso.modulo}</span>
+            {permiso.acceso ? (
+              <CheckCircle size={20} color={colors.success} />
+            ) : (
+              <XCircle size={20} color={colors.gray300} />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Tab Actividad
+const TabActividad = ({ usuario }) => {
+  const actividades = [
+    { fecha: '2024-01-10 08:45', accion: 'Creó nuevo cliente', modulo: 'Clientes' },
+    { fecha: '2024-01-10 08:30', accion: 'Editó pedido PED-1247', modulo: 'Pedidos' },
+    { fecha: '2024-01-10 08:15', accion: 'Generó reporte de ventas', modulo: 'Reportes' },
+    { fecha: '2024-01-10 07:50', accion: 'Actualizó inventario', modulo: 'Inventario' },
+    { fecha: '2024-01-09 18:45', accion: 'Cerró sesión', modulo: 'Sistema' }
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {actividades.map((act, idx) => (
+        <div
+          key={idx}
+          style={{
+            padding: 12,
+            backgroundColor: colors.gray50,
+            borderRadius: 8,
+            borderLeft: `3px solid ${colors.primary}`
+          }}
+        >
+          <div style={{ fontSize: 13, fontWeight: 600, color: colors.gray800, marginBottom: 4 }}>
+            {act.accion}
+          </div>
+          <div style={{ fontSize: 12, color: colors.gray500 }}>
+            <Badge color="gray" style={{ marginRight: 8 }}>
+              {act.modulo}
+            </Badge>
+            {act.fecha}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Tab Sesiones
+const TabSesiones = ({ usuario }) => {
+  const sesiones = [
+    { id: 1, dispositivo: 'Chrome - Windows', ip: '192.168.1.100', fecha: '2024-01-10 08:30', activa: true },
+    { id: 2, dispositivo: 'Safari - iPhone', ip: '192.168.1.105', fecha: '2024-01-09 18:45', activa: false },
+    { id: 3, dispositivo: 'Firefox - Windows', ip: '192.168.1.100', fecha: '2024-01-08 09:15', activa: false }
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {sesiones.map(sesion => (
+        <div
+          key={sesion.id}
+          style={{
+            padding: 12,
+            backgroundColor: colors.gray50,
+            borderRadius: 8,
+            border: `1px solid ${sesion.activa ? colors.success : colors.gray200}`
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: colors.gray800, marginBottom: 4 }}>
+                {sesion.dispositivo}
+              </div>
+              <div style={{ fontSize: 12, color: colors.gray500 }}>
+                IP: {sesion.ip} • {sesion.fecha}
+              </div>
+            </div>
+            <Badge color={sesion.activa ? 'success' : 'gray'}>
+              {sesion.activa ? 'Activa' : 'Cerrada'}
+            </Badge>
+          </div>
+          {sesion.activa && (
+            <Button variant="danger" style={{ fontSize: 12, padding: '6px 12px' }}>
+              Cerrar Sesión
+            </Button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Componente auxiliar InfoRow
+const InfoRow = ({ icon, label, value }) => (
+  <div style={{ 
+    display: 'flex', 
+    alignItems: 'center',
+    padding: '8px 0',
+    borderBottom: `1px solid ${colors.gray200}`
+  }}>
+    <div style={{ color: colors.gray400, marginRight: 12 }}>
+      {icon}
+    </div>
+    <div style={{ flex: 1 }}>
+      <div style={{ fontSize: 11, color: colors.gray500, marginBottom: 2 }}>
+        {label}
+      </div>
+      <div style={{ fontSize: 13, fontWeight: 500, color: colors.gray800 }}>
+        {value}
+      </div>
+    </div>
+  </div>
+);
+
+export default Usuarios;

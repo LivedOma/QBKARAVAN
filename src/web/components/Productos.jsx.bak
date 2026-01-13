@@ -1,0 +1,1283 @@
+import React, { useState } from 'react';
+import { Plus, Search, Filter, Edit, Trash2, Eye, Package, Tag, DollarSign, Box, AlertCircle, TrendingUp, BarChart3, Image as ImageIcon, X, Save } from 'lucide-react';
+import { colors } from '../../shared/colors.js';
+import { Card, Badge, Button } from '../../shared/SharedComponents.jsx';
+import WebHeader from './WebHeader.jsx';
+import WebTable from './WebTable.jsx';
+
+const Productos = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('todas');
+  const [filterStatus, setFilterStatus] = useState('todos');
+  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState('create');
+  const [selectedProducto, setSelectedProducto] = useState(null);
+  const [showDetalles, setShowDetalles] = useState(false);
+
+  // Datos de productos
+  const [productos, setProductos] = useState([
+    {
+      code: 'PRO-001',
+      nombre: 'Refresco Cola 600ml',
+      descripcion: 'Bebida carbonatada sabor cola',
+      categoria: 'Bebidas',
+      subcategoria: 'Refrescos',
+      marca: 'CocaCola',
+      presentacion: '600ml',
+      unidadMedida: 'Pieza',
+      codigoBarras: '7501234567890',
+      precioCompra: 12.50,
+      precioVenta: 30.00,
+      margen: 140,
+      stockActual: 450,
+      stockMinimo: 100,
+      stockMaximo: 1000,
+      peso: 0.6,
+      status: 'Activo',
+      imagen: null,
+      proveedor: 'Distribuidora Norte S.A.'
+    },
+    {
+      code: 'PRO-002',
+      nombre: 'Agua Natural 1L',
+      descripcion: 'Agua purificada natural',
+      categoria: 'Bebidas',
+      subcategoria: 'Agua',
+      marca: 'Bonafont',
+      presentacion: '1L',
+      unidadMedida: 'Pieza',
+      codigoBarras: '7501234567891',
+      precioCompra: 8.00,
+      precioVenta: 15.00,
+      margen: 87.5,
+      stockActual: 850,
+      stockMinimo: 200,
+      stockMaximo: 1500,
+      peso: 1.0,
+      status: 'Activo',
+      imagen: null,
+      proveedor: 'Grupo Embotellador'
+    },
+    {
+      code: 'PRO-003',
+      nombre: 'Galletas Choco 300g',
+      descripcion: 'Galletas con chispas de chocolate',
+      categoria: 'Dulces',
+      subcategoria: 'Galletas',
+      marca: 'Gamesa',
+      presentacion: '300g',
+      unidadMedida: 'Paquete',
+      codigoBarras: '7501234567892',
+      precioCompra: 18.00,
+      precioVenta: 30.00,
+      margen: 66.7,
+      stockActual: 320,
+      stockMinimo: 80,
+      stockMaximo: 600,
+      peso: 0.3,
+      status: 'Activo',
+      imagen: null,
+      proveedor: 'Pepsico Foods'
+    },
+    {
+      code: 'PRO-004',
+      nombre: 'Pan Dulce Tradicional',
+      descripcion: 'Pan dulce tradicional mexicano',
+      categoria: 'Panadería',
+      subcategoria: 'Pan Dulce',
+      marca: 'Bimbo',
+      presentacion: '6 piezas',
+      unidadMedida: 'Paquete',
+      codigoBarras: '7501234567893',
+      precioCompra: 15.00,
+      precioVenta: 25.00,
+      margen: 66.7,
+      stockActual: 180,
+      stockMinimo: 50,
+      stockMaximo: 400,
+      peso: 0.45,
+      status: 'Activo',
+      imagen: null,
+      proveedor: 'Grupo Bimbo'
+    },
+    {
+      code: 'PRO-005',
+      nombre: 'Jabón Líquido 500ml',
+      descripcion: 'Jabón líquido para manos aroma lavanda',
+      categoria: 'Limpieza',
+      subcategoria: 'Higiene Personal',
+      marca: 'Palmolive',
+      presentacion: '500ml',
+      unidadMedida: 'Pieza',
+      codigoBarras: '7501234567894',
+      precioCompra: 22.00,
+      precioVenta: 35.00,
+      margen: 59.1,
+      stockActual: 15,
+      stockMinimo: 30,
+      stockMaximo: 200,
+      peso: 0.5,
+      status: 'Activo',
+      imagen: null,
+      proveedor: 'Colgate-Palmolive'
+    },
+    {
+      code: 'PRO-006',
+      nombre: 'Papel Higiénico 4 Rollos',
+      descripcion: 'Papel higiénico suave doble hoja',
+      categoria: 'Limpieza',
+      subcategoria: 'Papel',
+      marca: 'Kleenex',
+      presentacion: '4 rollos',
+      unidadMedida: 'Paquete',
+      codigoBarras: '7501234567895',
+      precioCompra: 25.00,
+      precioVenta: 40.00,
+      margen: 60,
+      stockActual: 0,
+      stockMinimo: 40,
+      stockMaximo: 300,
+      peso: 0.4,
+      status: 'Inactivo',
+      imagen: null,
+      proveedor: 'Kimberly-Clark'
+    }
+  ]);
+
+  const [formData, setFormData] = useState({
+    nombre: '',
+    descripcion: '',
+    categoria: 'Bebidas',
+    subcategoria: '',
+    marca: '',
+    presentacion: '',
+    unidadMedida: 'Pieza',
+    codigoBarras: '',
+    precioCompra: '',
+    precioVenta: '',
+    stockMinimo: '',
+    stockMaximo: '',
+    peso: '',
+    proveedor: '',
+    status: 'Activo'
+  });
+
+  // Filtrar productos
+  const productosFiltrados = productos.filter(producto => {
+    const matchSearch = producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                       producto.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                       producto.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                       producto.codigoBarras.includes(searchTerm);
+    const matchCategory = filterCategory === 'todas' || producto.categoria === filterCategory;
+    const matchStatus = filterStatus === 'todos' || producto.status === filterStatus;
+    return matchSearch && matchCategory && matchStatus;
+  });
+
+  // Estadísticas
+  const stats = {
+    total: productos.length,
+    activos: productos.filter(p => p.status === 'Activo').length,
+    inactivos: productos.filter(p => p.status === 'Inactivo').length,
+    bajoStock: productos.filter(p => p.stockActual < p.stockMinimo).length,
+    sinStock: productos.filter(p => p.stockActual === 0).length,
+    valorInventario: productos.reduce((sum, p) => sum + (p.stockActual * p.precioCompra), 0)
+  };
+
+  const categorias = ['Bebidas', 'Dulces', 'Panadería', 'Limpieza', 'Abarrotes', 'Lácteos', 'Carnes'];
+
+  const handleCreate = () => {
+    setModalMode('create');
+    setFormData({
+      nombre: '',
+      descripcion: '',
+      categoria: 'Bebidas',
+      subcategoria: '',
+      marca: '',
+      presentacion: '',
+      unidadMedida: 'Pieza',
+      codigoBarras: '',
+      precioCompra: '',
+      precioVenta: '',
+      stockMinimo: '',
+      stockMaximo: '',
+      peso: '',
+      proveedor: '',
+      status: 'Activo'
+    });
+    setShowModal(true);
+  };
+
+  const handleEdit = (producto) => {
+    setModalMode('edit');
+    setSelectedProducto(producto);
+    setFormData({
+      nombre: producto.nombre,
+      descripcion: producto.descripcion,
+      categoria: producto.categoria,
+      subcategoria: producto.subcategoria,
+      marca: producto.marca,
+      presentacion: producto.presentacion,
+      unidadMedida: producto.unidadMedida,
+      codigoBarras: producto.codigoBarras,
+      precioCompra: producto.precioCompra,
+      precioVenta: producto.precioVenta,
+      stockMinimo: producto.stockMinimo,
+      stockMaximo: producto.stockMaximo,
+      peso: producto.peso,
+      proveedor: producto.proveedor,
+      status: producto.status
+    });
+    setShowModal(true);
+  };
+
+  const handleSave = () => {
+    const margen = ((parseFloat(formData.precioVenta) - parseFloat(formData.precioCompra)) / parseFloat(formData.precioCompra) * 100).toFixed(1);
+    
+    if (modalMode === 'create') {
+      const newProducto = {
+        code: `PRO-${String(productos.length + 1).padStart(3, '0')}`,
+        ...formData,
+        precioCompra: parseFloat(formData.precioCompra),
+        precioVenta: parseFloat(formData.precioVenta),
+        margen: parseFloat(margen),
+        stockActual: 0,
+        stockMinimo: parseInt(formData.stockMinimo),
+        stockMaximo: parseInt(formData.stockMaximo),
+        peso: parseFloat(formData.peso),
+        imagen: null
+      };
+      setProductos([...productos, newProducto]);
+    } else {
+      setProductos(productos.map(p => 
+        p.code === selectedProducto.code 
+          ? { 
+              ...p, 
+              ...formData,
+              precioCompra: parseFloat(formData.precioCompra),
+              precioVenta: parseFloat(formData.precioVenta),
+              margen: parseFloat(margen),
+              stockMinimo: parseInt(formData.stockMinimo),
+              stockMaximo: parseInt(formData.stockMaximo),
+              peso: parseFloat(formData.peso)
+            } 
+          : p
+      ));
+    }
+    setShowModal(false);
+  };
+
+  const handleDelete = (producto) => {
+    if (confirm(`¿Estás seguro de eliminar el producto ${producto.nombre}?`)) {
+      setProductos(productos.filter(p => p.code !== producto.code));
+    }
+  };
+
+  const handleViewDetails = (producto) => {
+    setSelectedProducto(producto);
+    setShowDetalles(true);
+  };
+
+  // Columnas para la tabla
+  const columns = [
+    {
+      header: 'Código',
+      key: 'code',
+      render: (producto) => (
+        <div>
+          <div style={{ fontFamily: 'monospace', fontWeight: 600, fontSize: 13 }}>
+            {producto.code}
+          </div>
+          <div style={{ fontSize: 11, color: colors.gray500, fontFamily: 'monospace' }}>
+            {producto.codigoBarras}
+          </div>
+        </div>
+      )
+    },
+    {
+      header: 'Producto',
+      key: 'nombre',
+      render: (producto) => (
+        <div>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>{producto.nombre}</div>
+          <div style={{ fontSize: 12, color: colors.gray500 }}>
+            {producto.marca} • {producto.presentacion}
+          </div>
+        </div>
+      )
+    },
+    {
+      header: 'Categoría',
+      key: 'categoria',
+      render: (producto) => (
+        <div>
+          <Badge color="accent">{producto.categoria}</Badge>
+          <div style={{ fontSize: 11, color: colors.gray500, marginTop: 4 }}>
+            {producto.subcategoria}
+          </div>
+        </div>
+      )
+    },
+    {
+      header: 'Precios',
+      key: 'precios',
+      render: (producto) => (
+        <div style={{ fontSize: 13 }}>
+          <div style={{ color: colors.gray500 }}>
+            Compra: <span style={{ fontWeight: 600 }}>${producto.precioCompra.toFixed(2)}</span>
+          </div>
+          <div style={{ color: colors.primary, fontWeight: 600 }}>
+            Venta: ${producto.precioVenta.toFixed(2)}
+          </div>
+          <div style={{ fontSize: 11, color: colors.success }}>
+            Margen: {producto.margen}%
+          </div>
+        </div>
+      )
+    },
+    {
+      header: 'Stock',
+      key: 'stock',
+      render: (producto) => {
+        const porcentaje = (producto.stockActual / producto.stockMaximo) * 100;
+        let color = colors.success;
+        if (producto.stockActual === 0) color = colors.danger;
+        else if (producto.stockActual < producto.stockMinimo) color = colors.warning;
+
+        return (
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, color }}>
+              {producto.stockActual}
+            </div>
+            <div style={{ fontSize: 11, color: colors.gray500 }}>
+              Mín: {producto.stockMinimo} / Máx: {producto.stockMaximo}
+            </div>
+            <div style={{ 
+              width: '100%', 
+              height: 4, 
+              backgroundColor: colors.gray200, 
+              borderRadius: 2,
+              marginTop: 4,
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: `${Math.min(porcentaje, 100)}%`,
+                height: '100%',
+                backgroundColor: color,
+                transition: 'width 0.3s'
+              }} />
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      header: 'Estado',
+      key: 'status',
+      render: (producto) => (
+        <div>
+          <Badge color={producto.status === 'Activo' ? 'success' : 'danger'}>
+            {producto.status}
+          </Badge>
+          {producto.stockActual === 0 && (
+            <div style={{ 
+              fontSize: 10, 
+              color: colors.danger, 
+              marginTop: 4,
+              fontWeight: 600 
+            }}>
+              ⚠️ Sin Stock
+            </div>
+          )}
+          {producto.stockActual > 0 && producto.stockActual < producto.stockMinimo && (
+            <div style={{ 
+              fontSize: 10, 
+              color: colors.warning, 
+              marginTop: 4,
+              fontWeight: 600 
+            }}>
+              ⚠️ Stock Bajo
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      header: 'Acciones',
+      key: 'actions',
+      render: (producto) => (
+        <div style={{ display: 'flex', gap: 4 }}>
+          <button
+            onClick={() => handleViewDetails(producto)}
+            style={{
+              padding: '6px 8px',
+              borderRadius: 6,
+              border: `1px solid ${colors.primary}`,
+              backgroundColor: 'white',
+              color: colors.primary,
+              cursor: 'pointer',
+              fontSize: 11
+            }}
+          >
+            <Eye size={14} />
+          </button>
+          <button
+            onClick={() => handleEdit(producto)}
+            style={{
+              padding: '6px 8px',
+              borderRadius: 6,
+              border: `1px solid ${colors.warning}`,
+              backgroundColor: 'white',
+              color: colors.warning,
+              cursor: 'pointer',
+              fontSize: 11
+            }}
+          >
+            <Edit size={14} />
+          </button>
+          <button
+            onClick={() => handleDelete(producto)}
+            style={{
+              padding: '6px 8px',
+              borderRadius: 6,
+              border: `1px solid ${colors.danger}`,
+              backgroundColor: 'white',
+              color: colors.danger,
+              cursor: 'pointer',
+              fontSize: 11
+            }}
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      )
+    }
+  ];
+
+  return (
+    <div style={{ 
+      marginLeft: 240, 
+      minHeight: '100vh',
+      backgroundColor: colors.gray50
+    }}>
+      <WebHeader 
+        title="Catálogo de Productos"
+        subtitle="Gestiona tu inventario de productos"
+      />
+
+      <div style={{ padding: 24 }}>
+        {/* Estadísticas */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(6, 1fr)', 
+          gap: 16, 
+          marginBottom: 24 
+        }}>
+          <Card style={{ textAlign: 'center', padding: 20 }}>
+            <Package size={32} color={colors.primary} style={{ margin: '0 auto 8px' }} />
+            <div style={{ fontSize: 28, fontWeight: 700, color: colors.primary }}>
+              {stats.total}
+            </div>
+            <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>
+              Total Productos
+            </div>
+          </Card>
+          <Card style={{ textAlign: 'center', padding: 20 }}>
+            <div style={{ fontSize: 28, fontWeight: 700, color: colors.success }}>
+              {stats.activos}
+            </div>
+            <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>
+              Activos
+            </div>
+          </Card>
+          <Card style={{ textAlign: 'center', padding: 20 }}>
+            <AlertCircle size={32} color={colors.warning} style={{ margin: '0 auto 8px' }} />
+            <div style={{ fontSize: 28, fontWeight: 700, color: colors.warning }}>
+              {stats.bajoStock}
+            </div>
+            <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>
+              Stock Bajo
+            </div>
+          </Card>
+          <Card style={{ textAlign: 'center', padding: 20 }}>
+            <div style={{ fontSize: 28, fontWeight: 700, color: colors.danger }}>
+              {stats.sinStock}
+            </div>
+            <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>
+              Sin Stock
+            </div>
+          </Card>
+          <Card style={{ textAlign: 'center', padding: 20 }}>
+            <div style={{ fontSize: 28, fontWeight: 700, color: colors.danger }}>
+              {stats.inactivos}
+            </div>
+            <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>
+              Inactivos
+            </div>
+          </Card>
+          <Card style={{ textAlign: 'center', padding: 20 }}>
+            <DollarSign size={32} color={colors.accent} style={{ margin: '0 auto 8px' }} />
+            <div style={{ fontSize: 24, fontWeight: 700, color: colors.accent }}>
+              ${(stats.valorInventario / 1000).toFixed(1)}K
+            </div>
+            <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>
+              Valor Inventario
+            </div>
+          </Card>
+        </div>
+
+        {/* Barra de búsqueda y filtros */}
+        <Card style={{ marginBottom: 24 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ flex: 1, position: 'relative' }}>
+              <Search 
+                size={18} 
+                style={{ 
+                  position: 'absolute', 
+                  left: 12, 
+                  top: '50%', 
+                  transform: 'translateY(-50%)',
+                  color: colors.gray400
+                }} 
+              />
+              <input
+                type="text"
+                placeholder="Buscar por nombre, código o código de barras..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px 10px 40px',
+                  border: `1px solid ${colors.gray300}`,
+                  borderRadius: 8,
+                  fontSize: 14,
+                  outline: 'none'
+                }}
+              />
+            </div>
+
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              style={{
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14,
+                minWidth: 150
+              }}
+            >
+              <option value="todas">Todas las categorías</option>
+              {categorias.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              style={{
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14,
+                minWidth: 130
+              }}
+            >
+              <option value="todos">Todos</option>
+              <option value="Activo">Activos</option>
+              <option value="Inactivo">Inactivos</option>
+            </select>
+
+            <Button variant="primary" icon={<Plus size={18} />} onClick={handleCreate}>
+              Nuevo Producto
+            </Button>
+          </div>
+        </Card>
+
+        {/* Tabla de productos */}
+        <Card>
+          <WebTable columns={columns} data={productosFiltrados} />
+          
+          {productosFiltrados.length === 0 && (
+            <div style={{ 
+              textAlign: 'center', 
+              padding: 40, 
+              color: colors.gray400 
+            }}>
+              <Package size={48} style={{ marginBottom: 12 }} />
+              <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
+                No se encontraron productos
+              </div>
+              <div style={{ fontSize: 14 }}>
+                {searchTerm || filterCategory !== 'todas' || filterStatus !== 'todos'
+                  ? 'Intenta con otros filtros de búsqueda'
+                  : 'Comienza agregando tu primer producto'
+                }
+              </div>
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* Modal Crear/Editar */}
+      {showModal && (
+        <ModalProductoForm
+          mode={modalMode}
+          formData={formData}
+          setFormData={setFormData}
+          categorias={categorias}
+          onSave={handleSave}
+          onClose={() => setShowModal(false)}
+        />
+      )}
+
+      {/* Panel de Detalles */}
+      {showDetalles && selectedProducto && (
+        <PanelDetallesProducto
+          producto={selectedProducto}
+          onClose={() => setShowDetalles(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+// Modal Formulario
+const ModalProductoForm = ({ mode, formData, setFormData, categorias, onSave, onClose }) => {
+  const margen = formData.precioCompra && formData.precioVenta 
+    ? ((parseFloat(formData.precioVenta) - parseFloat(formData.precioCompra)) / parseFloat(formData.precioCompra) * 100).toFixed(1)
+    : 0;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: 12,
+        width: '90%',
+        maxWidth: 900,
+        maxHeight: '90vh',
+        overflow: 'auto',
+        padding: 24
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: 24 
+        }}>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>
+            {mode === 'create' ? '📦 Nuevo Producto' : '✏️ Editar Producto'}
+          </h2>
+          <button
+            onClick={onClose}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer', 
+              padding: 4 
+            }}
+          >
+            <X size={24} color={colors.gray400} />
+          </button>
+        </div>
+
+        {/* Formulario */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+          {/* Información Básica */}
+          <div style={{ gridColumn: 'span 2' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: colors.gray700, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Package size={18} />
+              Información Básica
+            </h3>
+          </div>
+
+          <div style={{ gridColumn: 'span 2' }}>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Nombre del Producto *
+            </label>
+            <input
+              type="text"
+              value={formData.nombre}
+              onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+              placeholder="Ej: Refresco Cola 600ml"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ gridColumn: 'span 2' }}>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Descripción
+            </label>
+            <textarea
+              value={formData.descripcion}
+              onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
+              placeholder="Descripción breve del producto"
+              rows={2}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14,
+                resize: 'vertical',
+                fontFamily: 'inherit'
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Categoría *
+            </label>
+            <select
+              value={formData.categoria}
+              onChange={(e) => setFormData({...formData, categoria: e.target.value})}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+              required
+            >
+              {categorias.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Subcategoría
+            </label>
+            <input
+              type="text"
+              value={formData.subcategoria}
+              onChange={(e) => setFormData({...formData, subcategoria: e.target.value})}
+              placeholder="Ej: Refrescos"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Marca *
+            </label>
+            <input
+              type="text"
+              value={formData.marca}
+              onChange={(e) => setFormData({...formData, marca: e.target.value})}
+              placeholder="Ej: CocaCola"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+              required
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Presentación *
+            </label>
+            <input
+              type="text"
+              value={formData.presentacion}
+              onChange={(e) => setFormData({...formData, presentacion: e.target.value})}
+              placeholder="Ej: 600ml, 1kg, 6 piezas"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+              required
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Unidad de Medida *
+            </label>
+            <select
+              value={formData.unidadMedida}
+              onChange={(e) => setFormData({...formData, unidadMedida: e.target.value})}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+              required
+            >
+              <option>Pieza</option>
+              <option>Paquete</option>
+              <option>Caja</option>
+              <option>Kilogramo</option>
+              <option>Litro</option>
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Código de Barras
+            </label>
+            <input
+              type="text"
+              value={formData.codigoBarras}
+              onChange={(e) => setFormData({...formData, codigoBarras: e.target.value})}
+              placeholder="7501234567890"
+              maxLength={13}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14,
+                fontFamily: 'monospace'
+              }}
+            />
+          </div>
+
+          {/* Precios */}
+          <div style={{ gridColumn: 'span 2', marginTop: 16 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: colors.gray700, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <DollarSign size={18} />
+              Precios y Márgenes
+            </h3>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Precio de Compra *
+            </label>
+            <input
+              type="number"
+              value={formData.precioCompra}
+              onChange={(e) => setFormData({...formData, precioCompra: e.target.value})}
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+              required
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Precio de Venta *
+            </label>
+            <input
+              type="number"
+              value={formData.precioVenta}
+              onChange={(e) => setFormData({...formData, precioVenta: e.target.value})}
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+              required
+            />
+          </div>
+
+          {formData.precioCompra && formData.precioVenta && (
+            <div style={{ gridColumn: 'span 2' }}>
+              <Card style={{ 
+                padding: 16, 
+                backgroundColor: margen > 50 ? colors.success + '20' : colors.warning + '20',
+                border: `1px solid ${margen > 50 ? colors.success : colors.warning}`
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span style={{ fontSize: 13, color: colors.gray600 }}>Margen de Ganancia:</span>
+                  </div>
+                  <div style={{ 
+                    fontSize: 20, 
+                    fontWeight: 700, 
+                    color: margen > 50 ? colors.success : colors.warning 
+                  }}>
+                    {margen}%
+                  </div>
+                </div>
+                <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>
+                  Ganancia por unidad: ${(parseFloat(formData.precioVenta) - parseFloat(formData.precioCompra)).toFixed(2)}
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Inventario */}
+          <div style={{ gridColumn: 'span 2', marginTop: 16 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: colors.gray700, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Box size={18} />
+              Control de Inventario
+            </h3>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Stock Mínimo *
+            </label>
+            <input
+              type="number"
+              value={formData.stockMinimo}
+              onChange={(e) => setFormData({...formData, stockMinimo: e.target.value})}
+              placeholder="0"
+              min="0"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+              required
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Stock Máximo *
+            </label>
+            <input
+              type="number"
+              value={formData.stockMaximo}
+              onChange={(e) => setFormData({...formData, stockMaximo: e.target.value})}
+              placeholder="0"
+              min="0"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+              required
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Peso (kg)
+            </label>
+            <input
+              type="number"
+              value={formData.peso}
+              onChange={(e) => setFormData({...formData, peso: e.target.value})}
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Proveedor
+            </label>
+            <input
+              type="text"
+              value={formData.proveedor}
+              onChange={(e) => setFormData({...formData, proveedor: e.target.value})}
+              placeholder="Nombre del proveedor"
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>
+              Estado *
+            </label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({...formData, status: e.target.value})}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14
+              }}
+              required
+            >
+              <option>Activo</option>
+              <option>Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Botones */}
+        <div style={{ 
+          display: 'flex', 
+          gap: 12, 
+          justifyContent: 'flex-end',
+          marginTop: 24,
+          paddingTop: 24,
+          borderTop: `1px solid ${colors.gray200}`
+        }}>
+          <Button variant="secondary" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button variant="primary" icon={<Save size={18} />} onClick={onSave}>
+            {mode === 'create' ? 'Crear Producto' : 'Guardar Cambios'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Panel de Detalles
+const PanelDetallesProducto = ({ producto, onClose }) => {
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      width: '50%',
+      backgroundColor: 'white',
+      boxShadow: '-4px 0 12px rgba(0,0,0,0.15)',
+      zIndex: 1001,
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'auto'
+    }}>
+      {/* Header */}
+      <div style={{ 
+        padding: 24, 
+        borderBottom: `1px solid ${colors.gray200}`,
+        backgroundColor: colors.gray50
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+              <h2 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>
+                {producto.nombre}
+              </h2>
+              <Badge color={producto.status === 'Activo' ? 'success' : 'danger'}>
+                {producto.status}
+              </Badge>
+            </div>
+            <div style={{ fontSize: 14, color: colors.gray500, marginBottom: 4 }}>
+              {producto.code} • {producto.marca}
+            </div>
+            <div style={{ fontSize: 13, color: colors.gray600 }}>
+              {producto.descripcion}
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer', 
+              padding: 4 
+            }}
+          >
+            <X size={24} color={colors.gray400} />
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, padding: 24, backgroundColor: colors.gray50 }}>
+        <div style={{ display: 'grid', gap: 16 }}>
+          {/* Imagen */}
+          <Card>
+            <div style={{
+              height: 200,
+              backgroundColor: colors.gray100,
+              borderRadius: 8,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 8
+            }}>
+              <ImageIcon size={48} color={colors.gray400} />
+              <div style={{ fontSize: 14, color: colors.gray500 }}>
+                Sin imagen disponible
+              </div>
+            </div>
+          </Card>
+
+          {/* Información General */}
+          <Card>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
+              Información General
+            </h3>
+            <div style={{ display: 'grid', gap: 12 }}>
+              <InfoRow label="Categoría" value={producto.categoria} />
+              <InfoRow label="Subcategoría" value={producto.subcategoria} />
+              <InfoRow label="Presentación" value={producto.presentacion} />
+              <InfoRow label="Unidad de Medida" value={producto.unidadMedida} />
+              <InfoRow label="Código de Barras" value={producto.codigoBarras} />
+              <InfoRow label="Peso" value={`${producto.peso} kg`} />
+              <InfoRow label="Proveedor" value={producto.proveedor} />
+            </div>
+          </Card>
+
+          {/* Precios */}
+          <Card>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
+              Precios y Márgenes
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+              <div style={{ textAlign: 'center', padding: 16, backgroundColor: colors.gray50, borderRadius: 8 }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: colors.gray600 }}>
+                  ${producto.precioCompra.toFixed(2)}
+                </div>
+                <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>Precio Compra</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: 16, backgroundColor: colors.primary + '20', borderRadius: 8 }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: colors.primary }}>
+                  ${producto.precioVenta.toFixed(2)}
+                </div>
+                <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>Precio Venta</div>
+              </div>
+            </div>
+            <div style={{ marginTop: 16, padding: 16, backgroundColor: colors.success + '20', borderRadius: 8, textAlign: 'center' }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: colors.success }}>
+                {producto.margen}%
+              </div>
+              <div style={{ fontSize: 13, color: colors.gray600, marginTop: 4 }}>
+                Margen de Ganancia • ${(producto.precioVenta - producto.precioCompra).toFixed(2)} por unidad
+              </div>
+            </div>
+          </Card>
+
+          {/* Stock */}
+          <Card>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
+              Inventario
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 16 }}>
+              <div style={{ textAlign: 'center', padding: 16, backgroundColor: colors.gray50, borderRadius: 8 }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: colors.gray600 }}>
+                  {producto.stockActual}
+                </div>
+                <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>Stock Actual</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: 16, backgroundColor: colors.warning + '20', borderRadius: 8 }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: colors.warning }}>
+                  {producto.stockMinimo}
+                </div>
+                <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>Mínimo</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: 16, backgroundColor: colors.success + '20', borderRadius: 8 }}>
+                <div style={{ fontSize: 24, fontWeight: 700, color: colors.success }}>
+                  {producto.stockMaximo}
+                </div>
+                <div style={{ fontSize: 12, color: colors.gray500, marginTop: 4 }}>Máximo</div>
+              </div>
+            </div>
+            <div style={{ 
+              width: '100%', 
+              height: 8, 
+              backgroundColor: colors.gray200, 
+              borderRadius: 4,
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                width: `${(producto.stockActual / producto.stockMaximo) * 100}%`,
+                height: '100%',
+                backgroundColor: producto.stockActual < producto.stockMinimo ? colors.warning : colors.success,
+                transition: 'width 0.3s'
+              }} />
+            </div>
+            <div style={{ marginTop: 12, fontSize: 13, color: colors.gray600, textAlign: 'center' }}>
+              {producto.stockActual === 0 && (
+                <span style={{ color: colors.danger, fontWeight: 600 }}>⚠️ Sin stock disponible</span>
+              )}
+              {producto.stockActual > 0 && producto.stockActual < producto.stockMinimo && (
+                <span style={{ color: colors.warning, fontWeight: 600 }}>⚠️ Stock por debajo del mínimo</span>
+              )}
+              {producto.stockActual >= producto.stockMinimo && (
+                <span style={{ color: colors.success, fontWeight: 600 }}>✓ Stock adecuado</span>
+              )}
+            </div>
+          </Card>
+
+          {/* Valor en Inventario */}
+          <Card>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
+              Valor en Inventario
+            </h3>
+            <div style={{ textAlign: 'center', padding: 20, backgroundColor: colors.accent + '20', borderRadius: 8 }}>
+              <div style={{ fontSize: 32, fontWeight: 700, color: colors.accent }}>
+                ${(producto.stockActual * producto.precioCompra).toLocaleString()}
+              </div>
+              <div style={{ fontSize: 13, color: colors.gray600, marginTop: 4 }}>
+                Valor total al costo • {producto.stockActual} unidades
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Componente auxiliar
+const InfoRow = ({ label, value }) => (
+  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
+    <span style={{ color: colors.gray500 }}>{label}:</span>
+    <span style={{ fontWeight: 600, color: colors.gray700 }}>{value}</span>
+  </div>
+);
+
+export default Productos;

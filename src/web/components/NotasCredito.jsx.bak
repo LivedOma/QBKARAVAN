@@ -1,0 +1,1319 @@
+import React, { useState } from 'react';
+import { FileText, DollarSign, CheckCircle, XCircle, Clock, AlertTriangle, Download, Printer, Send, User, Calendar, Search, Filter, Tag, TrendingDown, CreditCard } from 'lucide-react';
+import { colors } from '../../shared/colors.js';
+import { Card, Badge, Button } from '../../shared/SharedComponents.jsx';
+import WebHeader from './WebHeader.jsx';
+
+const NotasCredito = () => {
+  const [busqueda, setBusqueda] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState('todos');
+  const [filtroTipo, setFiltroTipo] = useState('todos');
+  const [tabActiva, setTabActiva] = useState('pendientes');
+  const [modalNota, setModalNota] = useState(false);
+  const [panelDetalles, setPanelDetalles] = useState(false);
+  const [notaSeleccionada, setNotaSeleccionada] = useState(null);
+
+  const notasCredito = [
+    {
+      id: 'NC-048',
+      folio: '00048',
+      fecha: '2024-01-10',
+      cliente: 'Abarrotes Don José',
+      clienteId: 'CLI-001',
+      rfc: 'XAXX010101000',
+      origen: 'Devolución',
+      devolucionId: 'DEV-001',
+      pedidoId: 'PED-1245',
+      facturaOriginal: 'FAC-2024-0985',
+      conceptos: [
+        { descripcion: 'Refresco Cola 600ml', cantidad: 12, precioUnitario: 30, subtotal: 360, iva: 57.6, total: 417.6 },
+        { descripcion: 'Galletas Choco 300g', cantidad: 5, precioUnitario: 30, subtotal: 150, iva: 24, total: 174 }
+      ],
+      subtotal: 510,
+      iva: 81.6,
+      total: 591.6,
+      estado: 'Pendiente',
+      motivo: 'Producto dañado',
+      observaciones: 'Devolución por daño en transporte',
+      aplicadaSaldo: false,
+      creadoPor: 'María González',
+      fechaCreacion: '2024-01-10 09:15'
+    },
+    {
+      id: 'NC-047',
+      folio: '00047',
+      fecha: '2024-01-10',
+      cliente: 'Mini Super El Sol',
+      clienteId: 'CLI-002',
+      rfc: 'XAXX010101000',
+      origen: 'Ajuste',
+      devolucionId: null,
+      pedidoId: 'PED-1240',
+      facturaOriginal: 'FAC-2024-0982',
+      conceptos: [
+        { descripcion: 'Ajuste por descuento aplicado', cantidad: 1, precioUnitario: 150, subtotal: 150, iva: 24, total: 174 }
+      ],
+      subtotal: 150,
+      iva: 24,
+      total: 174,
+      estado: 'Pendiente',
+      motivo: 'Descuento no aplicado',
+      observaciones: 'Descuento por volumen no reflejado en factura original',
+      aplicadaSaldo: false,
+      creadoPor: 'Carlos Ramírez',
+      fechaCreacion: '2024-01-10 08:45'
+    },
+    {
+      id: 'NC-046',
+      folio: '00046',
+      fecha: '2024-01-09',
+      cliente: 'Tienda La Esquina',
+      clienteId: 'CLI-003',
+      rfc: 'XAXX010101000',
+      origen: 'Devolución',
+      devolucionId: 'DEV-003',
+      pedidoId: 'PED-1189',
+      facturaOriginal: 'FAC-2024-0945',
+      conceptos: [
+        { descripcion: 'Agua Natural 1L', cantidad: 24, precioUnitario: 15, subtotal: 360, iva: 57.6, total: 417.6 }
+      ],
+      subtotal: 360,
+      iva: 57.6,
+      total: 417.6,
+      estado: 'Aprobada',
+      motivo: 'Exceso de inventario',
+      observaciones: 'Pedido duplicado por error del sistema',
+      aplicadaSaldo: false,
+      creadoPor: 'María González',
+      fechaCreacion: '2024-01-09 14:30',
+      aprobadoPor: 'Carlos Ramírez',
+      fechaAprobacion: '2024-01-09 15:00',
+      uuid: '12345678-1234-1234-1234-123456789abc'
+    },
+    {
+      id: 'NC-045',
+      folio: '00045',
+      fecha: '2024-01-09',
+      cliente: 'Comercial Pérez',
+      clienteId: 'CLI-004',
+      rfc: 'XAXX010101000',
+      origen: 'Bonificación',
+      devolucionId: null,
+      pedidoId: 'PED-1200',
+      facturaOriginal: 'FAC-2024-0920',
+      conceptos: [
+        { descripcion: 'Bonificación por pronto pago', cantidad: 1, precioUnitario: 500, subtotal: 500, iva: 80, total: 580 }
+      ],
+      subtotal: 500,
+      iva: 80,
+      total: 580,
+      estado: 'Aplicada',
+      motivo: 'Bonificación',
+      observaciones: 'Pago anticipado con 15 días de anticipo',
+      aplicadaSaldo: true,
+      creadoPor: 'Laura Torres',
+      fechaCreacion: '2024-01-09 10:30',
+      aprobadoPor: 'Carlos Ramírez',
+      fechaAprobacion: '2024-01-09 11:00',
+      fechaAplicacion: '2024-01-09 11:30',
+      aplicadoPor: 'María González',
+      uuid: '87654321-4321-4321-4321-cba987654321'
+    },
+    {
+      id: 'NC-044',
+      folio: '00044',
+      fecha: '2024-01-08',
+      cliente: 'Abarrotes Don José',
+      clienteId: 'CLI-001',
+      rfc: 'XAXX010101000',
+      origen: 'Devolución',
+      devolucionId: 'DEV-005',
+      pedidoId: 'PED-1098',
+      facturaOriginal: 'FAC-2024-0856',
+      conceptos: [
+        { descripcion: 'Refresco Cola 600ml', cantidad: 6, precioUnitario: 30, subtotal: 180, iva: 28.8, total: 208.8 }
+      ],
+      subtotal: 180,
+      iva: 28.8,
+      total: 208.8,
+      estado: 'Aplicada',
+      motivo: 'Producto dañado',
+      observaciones: 'Botellas rotas durante transporte',
+      aplicadaSaldo: true,
+      creadoPor: 'María González',
+      fechaCreacion: '2024-01-08 15:30',
+      aprobadoPor: 'Carlos Ramírez',
+      fechaAprobacion: '2024-01-08 16:00',
+      fechaAplicacion: '2024-01-08 16:30',
+      aplicadoPor: 'Laura Torres',
+      uuid: 'abcdef12-abcd-abcd-abcd-123456abcdef'
+    },
+    {
+      id: 'NC-043',
+      folio: '00043',
+      fecha: '2024-01-08',
+      cliente: 'Mini Super El Sol',
+      clienteId: 'CLI-002',
+      rfc: 'XAXX010101000',
+      origen: 'Cancelación',
+      devolucionId: null,
+      pedidoId: 'PED-1085',
+      facturaOriginal: 'FAC-2024-0845',
+      conceptos: [
+        { descripcion: 'Cancelación de factura', cantidad: 1, precioUnitario: 1250, subtotal: 1250, iva: 200, total: 1450 }
+      ],
+      subtotal: 1250,
+      iva: 200,
+      total: 1450,
+      estado: 'Cancelada',
+      motivo: 'Error en facturación',
+      observaciones: 'Factura emitida con datos incorrectos, se emitió nueva factura',
+      aplicadaSaldo: false,
+      creadoPor: 'Carlos Ramírez',
+      fechaCreacion: '2024-01-08 09:00',
+      canceladoPor: 'Carlos Ramírez',
+      fechaCancelacion: '2024-01-08 10:00',
+      motivoCancelacion: 'Datos fiscales incorrectos'
+    }
+  ];
+
+  const estadisticas = {
+    totalNotas: notasCredito.length,
+    notasPendientes: notasCredito.filter(n => n.estado === 'Pendiente').length,
+    notasAprobadas: notasCredito.filter(n => n.estado === 'Aprobada').length,
+    notasAplicadas: notasCredito.filter(n => n.estado === 'Aplicada').length,
+    notasCanceladas: notasCredito.filter(n => n.estado === 'Cancelada').length,
+    montoTotal: notasCredito.filter(n => n.estado !== 'Cancelada').reduce((sum, n) => sum + n.total, 0),
+    montoPendiente: notasCredito.filter(n => n.estado === 'Pendiente').reduce((sum, n) => sum + n.total, 0),
+    montoAplicado: notasCredito.filter(n => n.estado === 'Aplicada').reduce((sum, n) => sum + n.total, 0)
+  };
+
+  const notasFiltradas = notasCredito.filter(nota => {
+    const matchBusqueda = nota.id.toLowerCase().includes(busqueda.toLowerCase()) ||
+                         nota.cliente.toLowerCase().includes(busqueda.toLowerCase()) ||
+                         nota.folio.includes(busqueda);
+    const matchEstado = filtroEstado === 'todos' || nota.estado === filtroEstado;
+    const matchTipo = filtroTipo === 'todos' || nota.origen === filtroTipo;
+    
+    let matchTab = true;
+    if (tabActiva === 'pendientes') matchTab = nota.estado === 'Pendiente';
+    if (tabActiva === 'aprobadas') matchTab = nota.estado === 'Aprobada';
+    if (tabActiva === 'aplicadas') matchTab = nota.estado === 'Aplicada';
+    if (tabActiva === 'canceladas') matchTab = nota.estado === 'Cancelada';
+    
+    return matchBusqueda && matchEstado && matchTipo && matchTab;
+  });
+
+  const abrirModalNueva = () => {
+    setNotaSeleccionada(null);
+    setModalNota(true);
+  };
+
+  const abrirDetalles = (nota) => {
+    setNotaSeleccionada(nota);
+    setPanelDetalles(true);
+  };
+
+  return (
+    <div style={{ 
+      marginLeft: 240, 
+      minHeight: '100vh',
+      backgroundColor: colors.gray50
+    }}>
+      <WebHeader 
+        title="Notas de Crédito"
+        subtitle="Gestiona notas de crédito y abonos a clientes"
+      />
+
+      <div style={{ padding: 24 }}>
+        {/* Estadísticas */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(4, 1fr)', 
+          gap: 16, 
+          marginBottom: 24 
+        }}>
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                backgroundColor: colors.primary + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <FileText size={24} color={colors.primary} />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 4 }}>
+                  Total Notas
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: colors.gray800 }}>
+                  {estadisticas.totalNotas}
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                backgroundColor: colors.warning + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Clock size={24} color={colors.warning} />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 4 }}>
+                  Pendientes
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: colors.gray800 }}>
+                  {estadisticas.notasPendientes}
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                backgroundColor: colors.success + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <CheckCircle size={24} color={colors.success} />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 4 }}>
+                  Aplicadas
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: colors.gray800 }}>
+                  {estadisticas.notasAplicadas}
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 12,
+                backgroundColor: colors.accent + '20',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <DollarSign size={24} color={colors.accent} />
+              </div>
+              <div>
+                <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 4 }}>
+                  Monto Total
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 700, color: colors.gray800 }}>
+                  ${estadisticas.montoTotal.toLocaleString()}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ display: 'flex', gap: 8, borderBottom: `2px solid ${colors.gray200}` }}>
+            {[
+              { id: 'pendientes', label: 'Pendientes', count: estadisticas.notasPendientes, icon: Clock },
+              { id: 'aprobadas', label: 'Aprobadas', count: estadisticas.notasAprobadas, icon: CheckCircle },
+              { id: 'aplicadas', label: 'Aplicadas', count: estadisticas.notasAplicadas, icon: CreditCard },
+              { id: 'canceladas', label: 'Canceladas', count: estadisticas.notasCanceladas, icon: XCircle }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setTabActiva(tab.id)}
+                style={{
+                  padding: '12px 20px',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  borderBottom: `3px solid ${tabActiva === tab.id ? colors.primary : 'transparent'}`,
+                  color: tabActiva === tab.id ? colors.primary : colors.gray500,
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8
+                }}
+              >
+                <tab.icon size={18} />
+                {tab.label}
+                <Badge color={tabActiva === tab.id ? 'primary' : 'gray'}>
+                  {tab.count}
+                </Badge>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: panelDetalles ? '1fr 550px' : '1fr', gap: 24 }}>
+          {/* Lista de Notas */}
+          <div>
+            <Card style={{ marginBottom: 24 }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div style={{ flex: 1, position: 'relative' }}>
+                  <Search 
+                    size={18} 
+                    style={{ 
+                      position: 'absolute', 
+                      left: 12, 
+                      top: '50%', 
+                      transform: 'translateY(-50%)',
+                      color: colors.gray400 
+                    }} 
+                  />
+                  <input
+                    type="text"
+                    placeholder="Buscar por folio, cliente o ID..."
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px 10px 40px',
+                      border: `1px solid ${colors.gray300}`,
+                      borderRadius: 8,
+                      fontSize: 14
+                    }}
+                  />
+                </div>
+
+                <select
+                  value={filtroTipo}
+                  onChange={(e) => setFiltroTipo(e.target.value)}
+                  style={{
+                    padding: '10px 12px',
+                    border: `1px solid ${colors.gray300}`,
+                    borderRadius: 8,
+                    fontSize: 14,
+                    backgroundColor: 'white',
+                    minWidth: 180
+                  }}
+                >
+                  <option value="todos">Todos los tipos</option>
+                  <option value="Devolución">Devolución</option>
+                  <option value="Ajuste">Ajuste</option>
+                  <option value="Bonificación">Bonificación</option>
+                  <option value="Cancelación">Cancelación</option>
+                </select>
+
+                <Button variant="primary" icon={<FileText size={18} />} onClick={abrirModalNueva}>
+                  Nueva Nota
+                </Button>
+              </div>
+            </Card>
+
+            <Card>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: `2px solid ${colors.gray200}`, backgroundColor: colors.gray50 }}>
+                    <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Folio / Fecha
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Cliente
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Origen
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'left', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Motivo
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'right', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Monto
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Estado
+                    </th>
+                    <th style={{ padding: 12, textAlign: 'center', fontSize: 13, fontWeight: 600, color: colors.gray600 }}>
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {notasFiltradas.map(nota => (
+                    <tr 
+                      key={nota.id} 
+                      style={{ 
+                        borderBottom: `1px solid ${colors.gray100}`,
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => abrirDetalles(nota)}
+                    >
+                      <td style={{ padding: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: colors.gray800, marginBottom: 2 }}>
+                          {nota.id}
+                        </div>
+                        <div style={{ fontSize: 12, color: colors.gray500, fontFamily: 'monospace' }}>
+                          Folio: {nota.folio}
+                        </div>
+                        <div style={{ fontSize: 11, color: colors.gray400 }}>
+                          {nota.fecha}
+                        </div>
+                      </td>
+                      <td style={{ padding: 12 }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: colors.gray800, marginBottom: 2 }}>
+                          {nota.cliente}
+                        </div>
+                        <div style={{ fontSize: 12, color: colors.gray500 }}>
+                          {nota.clienteId}
+                        </div>
+                      </td>
+                      <td style={{ padding: 12 }}>
+                        <Badge color={
+                          nota.origen === 'Devolución' ? 'warning' :
+                          nota.origen === 'Ajuste' ? 'accent' :
+                          nota.origen === 'Bonificación' ? 'success' : 'gray'
+                        }>
+                          {nota.origen}
+                        </Badge>
+                        {nota.devolucionId && (
+                          <div style={{ fontSize: 11, color: colors.gray500, marginTop: 4 }}>
+                            {nota.devolucionId}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ padding: 12, fontSize: 13, color: colors.gray700 }}>
+                        {nota.motivo}
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'right' }}>
+                        <div style={{ fontSize: 16, fontWeight: 700, color: colors.accent, marginBottom: 2 }}>
+                          ${nota.total.toLocaleString()}
+                        </div>
+                        <div style={{ fontSize: 11, color: colors.gray500 }}>
+                          Subtotal: ${nota.subtotal.toLocaleString()}
+                        </div>
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'center' }}>
+                        <Badge color={
+                          nota.estado === 'Pendiente' ? 'warning' :
+                          nota.estado === 'Aprobada' ? 'primary' :
+                          nota.estado === 'Aplicada' ? 'success' : 'danger'
+                        }>
+                          {nota.estado}
+                        </Badge>
+                        {nota.aplicadaSaldo && (
+                          <div style={{ fontSize: 10, color: colors.success, marginTop: 4, fontWeight: 600 }}>
+                            ✓ Aplicada a cuenta
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ padding: 12, textAlign: 'center' }}>
+                        {nota.estado === 'Pendiente' ? (
+                          <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.log('Aprobar:', nota.id);
+                              }}
+                              style={{
+                                padding: '6px 12px',
+                                border: 'none',
+                                backgroundColor: colors.success,
+                                color: 'white',
+                                borderRadius: 6,
+                                cursor: 'pointer',
+                                fontSize: 12,
+                                fontWeight: 600
+                              }}
+                            >
+                              Aprobar
+                            </button>
+                          </div>
+                        ) : nota.estado === 'Aprobada' ? (
+                          <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.log('Aplicar:', nota.id);
+                              }}
+                              style={{
+                                padding: '6px 12px',
+                                border: 'none',
+                                backgroundColor: colors.primary,
+                                color: 'white',
+                                borderRadius: 6,
+                                cursor: 'pointer',
+                                fontSize: 12,
+                                fontWeight: 600,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 4
+                              }}
+                            >
+                              <CreditCard size={14} />
+                              Aplicar
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.log('Descargar PDF:', nota.id);
+                              }}
+                              style={{
+                                padding: 6,
+                                border: 'none',
+                                backgroundColor: colors.primary + '20',
+                                color: colors.primary,
+                                borderRadius: 6,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <Download size={16} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.log('Imprimir:', nota.id);
+                              }}
+                              style={{
+                                padding: 6,
+                                border: 'none',
+                                backgroundColor: colors.gray200,
+                                color: colors.gray600,
+                                borderRadius: 6,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <Printer size={16} />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {notasFiltradas.length === 0 && (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: 40,
+                  color: colors.gray400 
+                }}>
+                  <FileText size={48} style={{ marginBottom: 12 }} />
+                  <div style={{ fontSize: 16, fontWeight: 500 }}>
+                    No se encontraron notas de crédito
+                  </div>
+                </div>
+              )}
+            </Card>
+          </div>
+
+          {/* Panel de Detalles */}
+          {panelDetalles && notaSeleccionada && (
+            <PanelDetallesNota
+              nota={notaSeleccionada}
+              onClose={() => setPanelDetalles(false)}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Modal Nueva Nota */}
+      {modalNota && (
+        <ModalNotaCredito
+          onClose={() => setModalNota(false)}
+          onSave={(datos) => {
+            console.log('Guardar nota:', datos);
+            setModalNota(false);
+          }}
+        />
+      )}
+    </div>
+  );
+};
+
+// Modal para Nueva Nota de Crédito
+const ModalNotaCredito = ({ onClose, onSave }) => {
+  const [formData, setFormData] = useState({
+    cliente: '',
+    origen: 'Devolución',
+    devolucionId: '',
+    facturaOriginal: '',
+    motivo: '',
+    conceptos: [],
+    observaciones: ''
+  });
+
+  const [conceptoActual, setConceptoActual] = useState({
+    descripcion: '',
+    cantidad: 1,
+    precioUnitario: 0
+  });
+
+  const agregarConcepto = () => {
+    if (conceptoActual.descripcion && conceptoActual.precioUnitario > 0) {
+      const subtotal = conceptoActual.cantidad * conceptoActual.precioUnitario;
+      const iva = subtotal * 0.16;
+      const total = subtotal + iva;
+      
+      setFormData({
+        ...formData,
+        conceptos: [...formData.conceptos, { 
+          ...conceptoActual, 
+          id: Date.now(),
+          subtotal,
+          iva,
+          total
+        }]
+      });
+      setConceptoActual({
+        descripcion: '',
+        cantidad: 1,
+        precioUnitario: 0
+      });
+    }
+  };
+
+  const eliminarConcepto = (id) => {
+    setFormData({
+      ...formData,
+      conceptos: formData.conceptos.filter(c => c.id !== id)
+    });
+  };
+
+  const calcularTotales = () => {
+    const subtotal = formData.conceptos.reduce((sum, c) => sum + c.subtotal, 0);
+    const iva = formData.conceptos.reduce((sum, c) => sum + c.iva, 0);
+    const total = formData.conceptos.reduce((sum, c) => sum + c.total, 0);
+    return { subtotal, iva, total };
+  };
+
+  const totales = calcularTotales();
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      padding: 20
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: 12,
+        width: '100%',
+        maxWidth: 900,
+        maxHeight: '90vh',
+        overflow: 'auto'
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: 24,
+          borderBottom: `1px solid ${colors.gray200}`,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <h2 style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>
+            Nueva Nota de Crédito
+          </h2>
+          <button onClick={onClose} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 24 }}>
+            ×
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: 24 }}>
+          {/* Información General */}
+          <div style={{ marginBottom: 24 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: colors.gray700 }}>
+              Información General
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                  Cliente *
+                </label>
+                <input
+                  type="text"
+                  value={formData.cliente}
+                  onChange={(e) => setFormData({ ...formData, cliente: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: `1px solid ${colors.gray300}`,
+                    borderRadius: 8,
+                    fontSize: 14
+                  }}
+                  placeholder="Buscar cliente..."
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                  Origen *
+                </label>
+                <select
+                  value={formData.origen}
+                  onChange={(e) => setFormData({ ...formData, origen: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: `1px solid ${colors.gray300}`,
+                    borderRadius: 8,
+                    fontSize: 14,
+                    backgroundColor: 'white'
+                  }}
+                >
+                  <option value="Devolución">Devolución</option>
+                  <option value="Ajuste">Ajuste</option>
+                  <option value="Bonificación">Bonificación</option>
+                  <option value="Cancelación">Cancelación</option>
+                </select>
+              </div>
+
+              {formData.origen === 'Devolución' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                    ID Devolución
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.devolucionId}
+                    onChange={(e) => setFormData({ ...formData, devolucionId: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${colors.gray300}`,
+                      borderRadius: 8,
+                      fontSize: 14
+                    }}
+                    placeholder="DEV-XXXX"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                  Factura Original *
+                </label>
+                <input
+                  type="text"
+                  value={formData.facturaOriginal}
+                  onChange={(e) => setFormData({ ...formData, facturaOriginal: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: `1px solid ${colors.gray300}`,
+                    borderRadius: 8,
+                    fontSize: 14
+                  }}
+                  placeholder="FAC-2024-XXXX"
+                />
+              </div>
+
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                  Motivo *
+                </label>
+                <input
+                  type="text"
+                  value={formData.motivo}
+                  onChange={(e) => setFormData({ ...formData, motivo: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: `1px solid ${colors.gray300}`,
+                    borderRadius: 8,
+                    fontSize: 14
+                  }}
+                  placeholder="Describe el motivo de la nota de crédito..."
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Conceptos */}
+          <div style={{ marginBottom: 24 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: colors.gray700 }}>
+              Conceptos
+            </h3>
+            
+            <div style={{ 
+              padding: 16, 
+              backgroundColor: colors.gray50, 
+              borderRadius: 8,
+              marginBottom: 16
+            }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr auto', gap: 12, alignItems: 'end' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                    Descripción
+                  </label>
+                  <input
+                    type="text"
+                    value={conceptoActual.descripcion}
+                    onChange={(e) => setConceptoActual({ ...conceptoActual, descripcion: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      border: `1px solid ${colors.gray300}`,
+                      borderRadius: 6,
+                      fontSize: 13
+                    }}
+                    placeholder="Descripción del concepto"
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                    Cantidad
+                  </label>
+                  <input
+                    type="number"
+                    value={conceptoActual.cantidad}
+                    onChange={(e) => setConceptoActual({ ...conceptoActual, cantidad: parseInt(e.target.value) || 1 })}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      border: `1px solid ${colors.gray300}`,
+                      borderRadius: 6,
+                      fontSize: 13
+                    }}
+                    min="1"
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+                    Precio Unit.
+                  </label>
+                  <input
+                    type="number"
+                    value={conceptoActual.precioUnitario}
+                    onChange={(e) => setConceptoActual({ ...conceptoActual, precioUnitario: parseFloat(e.target.value) || 0 })}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      border: `1px solid ${colors.gray300}`,
+                      borderRadius: 6,
+                      fontSize: 13
+                    }}
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+
+                <Button 
+                  variant="primary" 
+                  onClick={agregarConcepto}
+                  style={{ padding: '8px 16px', fontSize: 13 }}
+                >
+                  Agregar
+                </Button>
+              </div>
+            </div>
+
+            {/* Lista de Conceptos */}
+            {formData.conceptos.length > 0 && (
+              <div style={{ border: `1px solid ${colors.gray200}`, borderRadius: 8, overflow: 'hidden', marginBottom: 16 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: colors.gray50 }}>
+                      <th style={{ padding: 10, textAlign: 'left', fontSize: 12, fontWeight: 600, color: colors.gray600 }}>Descripción</th>
+                      <th style={{ padding: 10, textAlign: 'center', fontSize: 12, fontWeight: 600, color: colors.gray600 }}>Cant.</th>
+                      <th style={{ padding: 10, textAlign: 'right', fontSize: 12, fontWeight: 600, color: colors.gray600 }}>P. Unit.</th>
+                      <th style={{ padding: 10, textAlign: 'right', fontSize: 12, fontWeight: 600, color: colors.gray600 }}>Subtotal</th>
+                      <th style={{ padding: 10, textAlign: 'right', fontSize: 12, fontWeight: 600, color: colors.gray600 }}>IVA</th>
+                      <th style={{ padding: 10, textAlign: 'right', fontSize: 12, fontWeight: 600, color: colors.gray600 }}>Total</th>
+                      <th style={{ padding: 10, textAlign: 'center', fontSize: 12, fontWeight: 600, color: colors.gray600 }}>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.conceptos.map(concepto => (
+                      <tr key={concepto.id} style={{ borderTop: `1px solid ${colors.gray100}` }}>
+                        <td style={{ padding: 10, fontSize: 13 }}>{concepto.descripcion}</td>
+                        <td style={{ padding: 10, textAlign: 'center', fontSize: 14, fontWeight: 600 }}>{concepto.cantidad}</td>
+                        <td style={{ padding: 10, textAlign: 'right', fontSize: 13 }}>${concepto.precioUnitario.toFixed(2)}</td>
+                        <td style={{ padding: 10, textAlign: 'right', fontSize: 14, fontWeight: 600 }}>${concepto.subtotal.toFixed(2)}</td>
+                        <td style={{ padding: 10, textAlign: 'right', fontSize: 13 }}>${concepto.iva.toFixed(2)}</td>
+                        <td style={{ padding: 10, textAlign: 'right', fontSize: 15, fontWeight: 700, color: colors.primary }}>${concepto.total.toFixed(2)}</td>
+                        <td style={{ padding: 10, textAlign: 'center' }}>
+                          <button
+                            onClick={() => eliminarConcepto(concepto.id)}
+                            style={{
+                              padding: 4,
+                              border: 'none',
+                              backgroundColor: colors.danger + '20',
+                              color: colors.danger,
+                              borderRadius: 4,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            <XCircle size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Totales */}
+            {formData.conceptos.length > 0 && (
+              <div style={{ 
+                padding: 16, 
+                backgroundColor: colors.accent + '10', 
+                borderRadius: 8,
+                display: 'flex',
+                justifyContent: 'flex-end'
+              }}>
+                <div style={{ width: 300 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ fontSize: 14, color: colors.gray600 }}>Subtotal:</span>
+                    <span style={{ fontSize: 16, fontWeight: 600 }}>${totales.subtotal.toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ fontSize: 14, color: colors.gray600 }}>IVA (16%):</span>
+                    <span style={{ fontSize: 16, fontWeight: 600 }}>${totales.iva.toFixed(2)}</span>
+                  </div>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    paddingTop: 12,
+                    borderTop: `2px solid ${colors.accent}`
+                  }}>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: colors.accent }}>Total:</span>
+                    <span style={{ fontSize: 24, fontWeight: 700, color: colors.accent }}>${totales.total.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Observaciones */}
+          <div>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 6, color: colors.gray700 }}>
+              Observaciones
+            </label>
+            <textarea
+              value={formData.observaciones}
+              onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                border: `1px solid ${colors.gray300}`,
+                borderRadius: 8,
+                fontSize: 14,
+                resize: 'vertical',
+                minHeight: 80,
+                fontFamily: 'inherit'
+              }}
+              placeholder="Información adicional sobre la nota de crédito..."
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          padding: 24,
+          borderTop: `1px solid ${colors.gray200}`,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          gap: 12
+        }}>
+          <Button variant="secondary" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={() => onSave({ ...formData, totales })}
+            icon={<FileText size={18} />}
+          >
+            Generar Nota de Crédito
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Panel de Detalles de Nota de Crédito
+const PanelDetallesNota = ({ nota, onClose }) => {
+  return (
+    <div style={{
+      backgroundColor: 'white',
+      borderRadius: 12,
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      height: 'fit-content',
+      position: 'sticky',
+      top: 24
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: 20,
+        borderBottom: `1px solid ${colors.gray200}`,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start'
+      }}>
+        <div>
+          <h3 style={{ fontSize: 18, fontWeight: 600, margin: 0, marginBottom: 4 }}>
+            {nota.id}
+          </h3>
+          <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 8, fontFamily: 'monospace' }}>
+            Folio: {nota.folio}
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+            <Badge color={
+              nota.estado === 'Pendiente' ? 'warning' :
+              nota.estado === 'Aprobada' ? 'primary' :
+              nota.estado === 'Aplicada' ? 'success' : 'danger'
+            }>
+              {nota.estado}
+            </Badge>
+            <Badge color={
+              nota.origen === 'Devolución' ? 'warning' :
+              nota.origen === 'Ajuste' ? 'accent' :
+              nota.origen === 'Bonificación' ? 'success' : 'gray'
+            }>
+              {nota.origen}
+            </Badge>
+          </div>
+          {nota.uuid && (
+            <div style={{ fontSize: 10, color: colors.gray400, fontFamily: 'monospace' }}>
+              UUID: {nota.uuid.substring(0, 20)}...
+            </div>
+          )}
+        </div>
+        <button 
+          onClick={onClose}
+          style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 24, color: colors.gray400 }}
+        >
+          ×
+        </button>
+      </div>
+
+      {/* Contenido */}
+      <div style={{ padding: 20, maxHeight: 600, overflowY: 'auto' }}>
+        {/* Información del Cliente */}
+        <Card style={{ padding: 16, backgroundColor: colors.gray50, marginBottom: 16 }}>
+          <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: colors.gray700 }}>
+            Cliente
+          </h4>
+          <InfoRow label="Nombre" value={nota.cliente} />
+          <InfoRow label="ID Cliente" value={nota.clienteId} />
+          <InfoRow label="RFC" value={nota.rfc} />
+          <InfoRow label="Fecha" value={nota.fecha} />
+        </Card>
+
+        {/* Referencias */}
+        <Card style={{ padding: 16, backgroundColor: colors.gray50, marginBottom: 16 }}>
+          <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: colors.gray700 }}>
+            Referencias
+          </h4>
+          <InfoRow label="Factura Original" value={nota.facturaOriginal} />
+          <InfoRow label="Pedido" value={nota.pedidoId} />
+          {nota.devolucionId && (
+            <InfoRow label="Devolución" value={nota.devolucionId} />
+          )}
+        </Card>
+
+        {/* Conceptos */}
+        <Card style={{ padding: 16, marginBottom: 16 }}>
+          <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: colors.gray700 }}>
+            Conceptos ({nota.conceptos.length})
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {nota.conceptos.map((concepto, idx) => (
+              <div 
+                key={idx}
+                style={{
+                  padding: 12,
+                  backgroundColor: colors.gray50,
+                  borderRadius: 8,
+                  borderLeft: `3px solid ${colors.accent}`
+                }}
+              >
+                <div style={{ fontSize: 13, fontWeight: 600, color: colors.gray800, marginBottom: 4 }}>
+                  {concepto.descripcion}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: colors.gray600 }}>
+                  <span>Cantidad: {concepto.cantidad}</span>
+                  <span>Precio Unit: ${concepto.precioUnitario.toFixed(2)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, paddingTop: 8, borderTop: `1px solid ${colors.gray200}` }}>
+                  <span style={{ fontSize: 11, color: colors.gray500 }}>
+                    Subtotal: ${concepto.subtotal.toFixed(2)} + IVA: ${concepto.iva.toFixed(2)}
+                  </span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: colors.accent }}>
+                    ${concepto.total.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Totales */}
+        <Card style={{ padding: 16, backgroundColor: colors.accent + '10', marginBottom: 16 }}>
+          <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: colors.accent }}>
+            Totales
+          </h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span style={{ fontSize: 13, color: colors.gray600 }}>Subtotal</span>
+            <span style={{ fontSize: 15, fontWeight: 600 }}>${nota.subtotal.toFixed(2)}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+            <span style={{ fontSize: 13, color: colors.gray600 }}>IVA (16%)</span>
+            <span style={{ fontSize: 15, fontWeight: 600 }}>${nota.iva.toFixed(2)}</span>
+          </div>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            paddingTop: 12,
+            borderTop: `2px solid ${colors.accent}`
+          }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: colors.accent }}>Total</span>
+            <span style={{ fontSize: 24, fontWeight: 700, color: colors.accent }}>
+              ${nota.total.toFixed(2)}
+            </span>
+          </div>
+        </Card>
+
+        {/* Motivo y Observaciones */}
+        <Card style={{ padding: 16, marginBottom: 16 }}>
+          <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, color: colors.gray700 }}>
+            Motivo
+          </h4>
+          <p style={{ fontSize: 13, color: colors.gray600, lineHeight: 1.6, margin: 0, marginBottom: 12 }}>
+            {nota.motivo}
+          </p>
+          {nota.observaciones && (
+            <>
+              <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 8, marginTop: 16, color: colors.gray700 }}>
+                Observaciones
+              </h4>
+              <p style={{ fontSize: 13, color: colors.gray600, lineHeight: 1.6, margin: 0 }}>
+                {nota.observaciones}
+              </p>
+            </>
+          )}
+        </Card>
+
+        {/* Historial */}
+        <Card style={{ padding: 16 }}>
+          <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: colors.gray700 }}>
+            Historial de Acciones
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ fontSize: 12, color: colors.gray600 }}>
+              <div style={{ fontWeight: 600, color: colors.primary, marginBottom: 2 }}>
+                📝 Creada
+              </div>
+              <div>{nota.fechaCreacion}</div>
+              <div>Por: {nota.creadoPor}</div>
+            </div>
+
+            {nota.fechaAprobacion && (
+              <div style={{ fontSize: 12, color: colors.gray600 }}>
+                <div style={{ fontWeight: 600, color: colors.success, marginBottom: 2 }}>
+                  ✓ Aprobada
+                </div>
+                <div>{nota.fechaAprobacion}</div>
+                <div>Por: {nota.aprobadoPor}</div>
+              </div>
+            )}
+
+            {nota.fechaAplicacion && (
+              <div style={{ fontSize: 12, color: colors.gray600 }}>
+                <div style={{ fontWeight: 600, color: colors.accent, marginBottom: 2 }}>
+                  💳 Aplicada al Saldo
+                </div>
+                <div>{nota.fechaAplicacion}</div>
+                <div>Por: {nota.aplicadoPor}</div>
+              </div>
+            )}
+
+            {nota.fechaCancelacion && (
+              <div style={{ fontSize: 12, color: colors.gray600 }}>
+                <div style={{ fontWeight: 600, color: colors.danger, marginBottom: 2 }}>
+                  ✗ Cancelada
+                </div>
+                <div>{nota.fechaCancelacion}</div>
+                <div>Por: {nota.canceladoPor}</div>
+                {nota.motivoCancelacion && (
+                  <div style={{ marginTop: 4, fontStyle: 'italic' }}>
+                    Motivo: {nota.motivoCancelacion}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Acciones */}
+        {nota.estado !== 'Cancelada' && (
+          <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
+            <Button 
+              variant="outline" 
+              icon={<Download size={16} />}
+              style={{ flex: 1, fontSize: 13 }}
+            >
+              Descargar PDF
+            </Button>
+            <Button 
+              variant="outline" 
+              icon={<Printer size={16} />}
+              style={{ flex: 1, fontSize: 13 }}
+            >
+              Imprimir
+            </Button>
+            <Button 
+              variant="outline" 
+              icon={<Send size={16} />}
+              style={{ flex: 1, fontSize: 13 }}
+            >
+              Enviar
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Componente auxiliar InfoRow
+const InfoRow = ({ label, value }) => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'space-between',
+    padding: '6px 0',
+    borderBottom: `1px solid ${colors.gray200}`
+  }}>
+    <span style={{ fontSize: 12, color: colors.gray500 }}>{label}</span>
+    <span style={{ fontSize: 13, fontWeight: 600, color: colors.gray800 }}>{value}</span>
+  </div>
+);
+
+export default NotasCredito;

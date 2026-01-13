@@ -1,0 +1,32 @@
+{
+  "name": "sivr-mockups",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:preventa": "vite --open /preventa.html --port 3001",
+    "dev:reparto": "vite --open /reparto.html --port 3002",
+    "dev:web": "vite --open /web.html --port 3003",
+    "dev:all": "concurrently \"npm run dev:preventa\" \"npm run dev:reparto\" \"npm run dev:web\"",
+    "build": "vite build",
+    "build:preventa": "vite build --base=/preventa/ --outDir=dist/preventa",
+    "build:reparto": "vite build --base=/reparto/ --outDir=dist/reparto",
+    "build:web": "vite build --base=/web/ --outDir=dist/web",
+    "build:all": "npm run build:preventa && npm run build:reparto && npm run build:web",
+    "preview": "vite preview",
+    "extract": "node extract-services.js"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.276.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-leaflet": "^4.2.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.2",
+    "concurrently": "^8.2.2",
+    "vite": "^5.0.0"
+  }
+}
