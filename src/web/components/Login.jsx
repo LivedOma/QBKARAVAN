@@ -46,10 +46,10 @@ const Login = ({ onLogin }) => {
         
         // Guardar token o sesión
         if (recordarme) {
-          localStorage.setItem('sivr_remember', 'true');
+          localStorage.setItem('karavan_remember', 'true');
         }
-        localStorage.setItem('sivr_token', 'demo-token-12345');
-        localStorage.setItem('sivr_user', JSON.stringify({
+        localStorage.setItem('karavan_token', 'demo-token-12345');
+        localStorage.setItem('karavan_user', JSON.stringify({
           id: 1,
           nombre: 'Administrador',
           usuario: formData.usuario,
@@ -117,7 +117,7 @@ const Login = ({ onLogin }) => {
             fontWeight: 700,
             color: colors.primary,
             margin: '0 0 8px 0',
-          }}>SIVR</h1>
+          }}>Karavan</h1>
           <p style={{
             fontSize: 14,
             color: colors.textSecondary,

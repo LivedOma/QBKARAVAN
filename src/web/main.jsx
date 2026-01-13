@@ -27,7 +27,7 @@ const WebApp = () => {
 
   // Verificar si hay sesión activa al cargar
   useEffect(() => {
-    const token = localStorage.getItem('sivr_token');
+    const token = localStorage.getItem('karavan_token');
     console.log('Verificando token al cargar:', token);
     if (token) {
       console.log('Token encontrado, autenticando...');
@@ -47,9 +47,9 @@ const WebApp = () => {
   // Manejar logout
   const handleLogout = () => {
     console.log('Cerrando sesión...');
-    localStorage.removeItem('sivr_token');
-    localStorage.removeItem('sivr_user');
-    localStorage.removeItem('sivr_remember');
+    localStorage.removeItem('karavan_token');
+    localStorage.removeItem('karavan_user');
+    localStorage.removeItem('karavan_remember');
     setIsAuthenticated(false);
     setCurrentPage('dashboard');
   };

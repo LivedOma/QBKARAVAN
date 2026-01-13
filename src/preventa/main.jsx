@@ -37,7 +37,7 @@ const PreventaApp = () => {
 
   // Verificar si hay sesión activa al cargar
   useEffect(() => {
-    const token = localStorage.getItem('sivr_preventa_token');
+    const token = localStorage.getItem('karavan_preventa_token');
     console.log('Preventa - Verificando token al cargar:', token);
     if (token) {
       console.log('Preventa - Token encontrado, autenticando...');
@@ -65,9 +65,9 @@ const PreventaApp = () => {
   // Manejar logout
   const handleLogout = () => {
     console.log('Preventa - Cerrando sesión...');
-    localStorage.removeItem('sivr_preventa_token');
-    localStorage.removeItem('sivr_preventa_user');
-    localStorage.removeItem('sivr_preventa_remember');
+    localStorage.removeItem('karavan_preventa_token');
+    localStorage.removeItem('karavan_preventa_user');
+    localStorage.removeItem('karavan_preventa_remember');
     setIsAuthenticated(false);
     setCurrentScreen('home');
     setIsCheckedIn(false);
@@ -134,7 +134,7 @@ const PreventaApp = () => {
   const HomeScreen = () => {
     // Obtener información del usuario del localStorage
     const getUserInfo = () => {
-      const userStr = localStorage.getItem('sivr_preventa_user');
+      const userStr = localStorage.getItem('karavan_preventa_user');
       if (userStr) {
         try {
           return JSON.parse(userStr);
@@ -148,7 +148,7 @@ const PreventaApp = () => {
     const user = getUserInfo();
 
     return (
-    <MobileFrame title="SIVR - Preventa" statusBar={true}>
+    <MobileFrame title="Karavan - Preventa" statusBar={true}>
       <div style={{ padding: 16 }}>
         <div style={{
           background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})`,

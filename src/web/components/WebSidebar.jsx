@@ -26,7 +26,7 @@ const WebSidebar = ({ currentPage, onNavigate, onLogout }) => {
 
   // Obtener información del usuario del localStorage
   const getUserInfo = () => {
-    const userStr = localStorage.getItem('sivr_user');
+    const userStr = localStorage.getItem('karavan_user');
     if (userStr) {
       try {
         return JSON.parse(userStr);
@@ -55,7 +55,7 @@ const WebSidebar = ({ currentPage, onNavigate, onLogout }) => {
       <div style={{ padding: 20, borderBottom: `1px solid ${colors.primary}` }}>
         <div style={{ fontSize: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
           <Truck size={24} />
-          SIVR
+          Karavan
         </div>
         <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>Sistema de Venta en Ruta</div>
       </div>

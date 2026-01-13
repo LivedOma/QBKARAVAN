@@ -39,7 +39,7 @@ const RepartoApp = () => {
 
   // Pantalla de Inicio
   const HomeScreen = () => (
-    <MobileFrame title="SIVR - Reparto" statusBar={true}>
+    <MobileFrame title="Karavan - Reparto" statusBar={true}>
       <div style={{ padding: 16 }}>
         <div style={{
           background: `linear-gradient(135deg, #f093fb, #f5576c)`,

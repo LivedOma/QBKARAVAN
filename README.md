@@ -1,4 +1,4 @@
-# SIVR - Sistema Integrado de Venta en Ruta
+# Karavan - Sistema Integrado de Venta en Ruta
 
 ## 🎯 Arquitectura de 3 Aplicaciones Independientes
 
@@ -90,7 +90,7 @@ Los builds se generarán en:
 ## 🏗️ Estructura del Proyecto
 
 ```
-sivr-mockups/
+karavan-mockups/
 ├── src/
 │   ├── shared/                  # Código compartido
 │   │   ├── colors.js           # Paleta de colores
@@ -182,7 +182,7 @@ Puedes modificar los colores en los archivos HTML respectivos.
 
 ## 🔄 Migración desde el Sistema Unificado
 
-Si necesitas migrar datos o componentes del sistema unificado original (`mockups-sivr.jsx`):
+Si necesitas migrar datos o componentes del sistema unificado original (`mockups-karavan.jsx`):
 
 1. Los componentes compartidos ya están extraídos en `src/shared/`
 2. El servicio de notificaciones está en `src/shared/NotificationService.jsx`
@@ -219,4 +219,4 @@ Para preguntas o issues:
 
 ---
 
-**¡Disfruta desarrollando con SIVR! 🚀**
+**¡Disfruta desarrollando con Karavan! 🚀**

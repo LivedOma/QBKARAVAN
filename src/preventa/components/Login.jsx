@@ -48,10 +48,10 @@ const Login = ({ onLogin }) => {
         
         // Guardar token o sesión
         if (recordarme) {
-          localStorage.setItem('sivr_preventa_remember', 'true');
+          localStorage.setItem('karavan_preventa_remember', 'true');
         }
-        localStorage.setItem('sivr_preventa_token', `preventa-token-${Date.now()}`);
-        localStorage.setItem('sivr_preventa_user', JSON.stringify({
+        localStorage.setItem('karavan_preventa_token', `preventa-token-${Date.now()}`);
+        localStorage.setItem('karavan_preventa_user', JSON.stringify({
           id: Math.floor(Math.random() * 1000),
           nombre: user.nombre,
           usuario: formData.usuario,
@@ -120,7 +120,7 @@ const Login = ({ onLogin }) => {
             fontWeight: 700,
             color: colors.primary,
             margin: '0 0 6px 0',
-          }}>Preventa SIVR</h1>
+          }}>Karavan Preventa</h1>
           <p style={{
             fontSize: 13,
             color: colors.textSecondary,
